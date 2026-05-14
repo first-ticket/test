@@ -1,0 +1,483 @@
+### ============================================================
+###  First Ticket API — IntelliJ HTTP Client
+###  JS 핸들러로 응답값 자동 저장: client.global.set()
+###
+###  [시연 순서]
+###  Step 1  : #A-1  로그인 (CUSTOMER)        → accessToken 저장
+###  Step 2  : #A-2  로그인 (HOST)            → hostAccessToken 저장
+###  Step 3  : #A-3  로그인 (ADMIN)           → adminAccessToken 저장
+###  Step 4  : #B-1  공연장 등록              → venueId / sectionId 저장
+###  Step 5  : #C-1  프로그램 등록            → programId 저장
+###  Step 6  : #C-2  스케줄 등록              → scheduleId 저장
+###  Step 7  : #C-3  가격 등급 추가
+###  Step 8  : #C-4  판매 시작 (DRAFT → ON_SALE)
+###  Step 9  : #D-1  대기열 진입
+###  Step 10 : #D-2  대기 정보 폴링           → ADMITTED 되면 entryToken 저장
+###  Step 11 : #E-1  예매 세션 토큰 발급      → sessionToken 저장
+###  Step 12 : #E-2  좌석 목록 조회           → seatId1 / seatId2 저장
+###  Step 13 : #E-3  좌석 선점
+###  Step 14 : #F-1  예매 생성               → bookingId 저장
+###  Step 15 : #G-1  결제창 실행             → 브라우저에서 URL 직접 접속
+###  Step 16 : #G-2  결제 상세 조회           → SUCCESS 상태 확인
+###  Step 17 : #F-2  예매 단건 조회           → CONFIRMED 상태 확인
+###  Step 18 : #E-2  좌석 목록 재조회         → RESERVED 상태 확인
+###  Step 19 : #G-3  환불 요청
+###
+###  [HOST 권한 신청 시연 — 선택]
+###  A-4. 신규 회원가입     → newEmail(동적) 저장
+###  A-5. 신규 계정 로그인  → tempToken 저장
+###  A-6. HOST 권한 신청   → requestId 저장
+###  A-7. HOST 신청 승인   (ADMIN)
+### ============================================================
+
+### ──────────────────────────────────────────────────────────
+### [고정 변수 — 필요 시 수정]
+### ──────────────────────────────────────────────────────────
+
+### 사전 생성 테스트 계정 (LocalDataInitializer)
+@customerEmail    = customer@first-ticket.com
+@customerPassword = Customer1234!
+@hostEmail        = host@first-ticket.com
+@hostPassword     = Host1234!
+@adminEmail       = admin@first-ticket.com
+@adminPassword    = Admin1234!
+
+### 신규 가입 계정 비밀번호 (HOST 권한 신청 시연용)
+@newPassword = Test1234!
+
+### [동적 변수 — JS 핸들러로 자동 저장]
+### #A-1 → accessToken, refreshToken
+### #A-2 → hostAccessToken
+### #A-3 → adminAccessToken
+### #A-4 → newEmail(동적)
+### #A-5 → tempToken
+### #A-6 → requestId
+### #B-1 → venueId, sectionId
+### #C-1 → programId
+### #C-2 → scheduleId
+### #D-2 → entryToken
+### #E-1 → sessionToken
+### #E-2 → seatId1, seatId2
+### #F-1 → bookingId, bookingOrderId, bookingPaymentId
+### #G-2 → paymentId
+
+
+### ============================================================
+###  A. AUTH & USER — 인증 · 권한
+### ============================================================
+
+### A-1. 로그인 (CUSTOMER — 예매 흐름에서 사용)
+# @name customerLogin
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{customerEmail}}",
+  "password": "{{customerPassword}}"
+}
+
+> {%
+  client.global.set("accessToken", response.body.data.accessToken);
+  client.global.set("refreshToken", response.body.data.refreshToken);
+%}
+
+### ──────────────────────────────────────────────────────────
+
+### A-2. 로그인 (HOST — 공연장·프로그램 등록에서 사용)
+# @name hostLogin
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{hostEmail}}",
+  "password": "{{hostPassword}}"
+}
+
+> {%
+  client.global.set("hostAccessToken", response.body.data.accessToken);
+%}
+
+### ──────────────────────────────────────────────────────────
+
+### A-3. 로그인 (ADMIN)
+# @name adminLogin
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+> {%
+  client.global.set("adminAccessToken", response.body.data.accessToken);
+%}
+
+### ──────────────────────────────────────────────────────────
+### [HOST 권한 신청 시연 — 선택]
+### ──────────────────────────────────────────────────────────
+
+### A-4. 신규 회원가입 (이메일 중복 방지를 위해 타임스탬프로 동적 생성)
+# @name newSignup
+< {%
+  var email = "test_" + Date.now() + "@example.com";
+  client.global.set("newEmail", email);
+%}
+POST {{baseUrl}}/api/v1/auth/signup
+Content-Type: application/json
+
+{
+  "email": "{{newEmail}}",
+  "password": "{{newPassword}}",
+  "username": "테스트유저"
+}
+
+### ──────────────────────────────────────────────────────────
+
+### A-5. 신규 계정 로그인
+# @name tempLogin
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{newEmail}}",
+  "password": "{{newPassword}}"
+}
+
+> {%
+  client.global.set("tempToken", response.body.data.accessToken);
+%}
+
+### ──────────────────────────────────────────────────────────
+
+### A-6. HOST 권한 신청
+# @name hostRequest
+POST {{baseUrl}}/api/v1/users/me/host-requests
+Authorization: Bearer {{tempToken}}
+
+> {%
+  client.global.set("requestId", response.body.data.id);
+%}
+
+### ──────────────────────────────────────────────────────────
+
+### A-7. HOST 신청 승인 (ADMIN)
+PATCH {{baseUrl}}/api/v1/admin/host-requests/{{requestId}}
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: application/json
+
+{
+  "action": "APPROVE"
+}
+
+### ──────────────────────────────────────────────────────────
+
+### A-8. HOST 신청 거절 (ADMIN)
+PATCH {{baseUrl}}/api/v1/admin/host-requests/{{requestId}}
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: application/json
+
+{
+  "action": "REJECT"
+}
+
+### ──────────────────────────────────────────────────────────
+
+### A-9. 토큰 재발급
+POST {{baseUrl}}/api/v1/auth/token/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+> {%
+  client.global.set("accessToken", response.body.data.accessToken);
+  client.global.set("refreshToken", response.body.data.refreshToken);
+%}
+
+### ──────────────────────────────────────────────────────────
+
+### A-10. 로그아웃
+POST {{baseUrl}}/api/v1/auth/logout
+Authorization: Bearer {{accessToken}}
+
+### ──────────────────────────────────────────────────────────
+
+### A-11. 내 정보 조회
+GET {{baseUrl}}/api/v1/users/me
+Authorization: Bearer {{accessToken}}
+
+### ──────────────────────────────────────────────────────────
+
+### A-12. HOST 신청 거절 (ADMIN)
+PATCH {{baseUrl}}/api/v1/admin/host-requests/{{requestId}}
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: application/json
+
+{
+  "action": "REJECT"
+}
+
+
+### ============================================================
+###  B. VENUE — 공연장 등록
+### ============================================================
+
+### B-1. 공연장 등록 (HOST)
+# @name createVenue
+POST {{baseUrl}}/api/v1/venues
+Content-Type: application/json
+Authorization: Bearer {{hostAccessToken}}
+
+{
+  "name": "올림픽 체조경기장",
+  "address": "서울특별시 송파구 올림픽로 424",
+  "sections": [
+    {
+      "name": "1층 지정석",
+      "type": "SEATED",
+      "rowCount": 10,
+      "colCount": 20
+    }
+  ]
+}
+
+> {%
+  client.global.set("venueId", response.body.data.id);
+  client.global.set("sectionId", response.body.data.sections[0].id);
+%}
+
+
+### ============================================================
+###  C. PROGRAM — 프로그램 · 스케줄 · 가격 등급
+### ============================================================
+
+### C-1. 프로그램 등록 (HOST) — 초기 상태: DRAFT
+# @name createProgram
+POST {{baseUrl}}/api/v1/programs
+Content-Type: application/json
+Authorization: Bearer {{hostAccessToken}}
+
+{
+  "title": "2026 월드 투어 콘서트",
+  "category": "CONCERT",
+  "theme": "MUSIC",
+  "type": "SEATED",
+  "region": "SEOUL",
+  "posterUrl": "https://example.com/poster.jpg",
+  "description": "최고의 아티스트와 함께하는 콘서트"
+}
+
+> {%
+  client.global.set("programId", response.body.data.id);
+%}
+
+### ──────────────────────────────────────────────────────────
+
+### C-2. 스케줄 등록 (HOST)
+# 조건: saleEndAt < eventStartAt
+# @name createSchedule
+< {%
+    var d = new Date(Date.now() + 60 * 1000);
+    var now = d.toISOString().slice(0, 19);
+    client.global.set("nowDateTime", now);
+%}
+POST {{baseUrl}}/api/v1/programs/{{programId}}/schedules
+Content-Type: application/json
+Authorization: Bearer {{hostAccessToken}}
+
+{
+  "venueId": "{{venueId}}",
+  "eventStartAt": "2026-06-03T19:00:00",
+  "eventEndAt":   "2026-06-03T21:00:00",
+  "saleStartAt":  "{{nowDateTime}}",
+  "saleEndAt":    "2026-05-31T23:59:59",
+  "totalCapacity": 100
+}
+
+> {%
+  client.global.set("scheduleId", response.body.data.schedules[0].id);
+%}
+
+### ──────────────────────────────────────────────────────────
+
+### C-3. 가격 등급 추가 (HOST)
+POST {{baseUrl}}/api/v1/programs/{{programId}}/schedules/{{scheduleId}}/price-grades
+Content-Type: application/json
+Authorization: Bearer {{hostAccessToken}}
+
+{
+  "gradeLabel": "일반석",
+  "sectionId": "{{sectionId}}",
+  "price": 70000
+}
+
+### ──────────────────────────────────────────────────────────
+
+### C-4. 판매 시작 (DRAFT → ON_SALE)
+# 모든 스케줄에 가격 등급 1개 이상 필요
+PATCH {{baseUrl}}/api/v1/programs/{{programId}}/publish
+Authorization: Bearer {{hostAccessToken}}
+
+### ──────────────────────────────────────────────────────────
+
+### C-5. 프로그램 상세 조회 (스케줄 + 잔여 좌석 포함)
+GET {{baseUrl}}/api/v1/programs/{{programId}}
+Authorization: Bearer {{accessToken}}
+
+
+### ============================================================
+###  D. QUEUE — 대기열
+### ============================================================
+
+### D-1. 대기열 진입 — 대기 토큰 발급
+POST {{baseUrl}}/api/v1/queues/programs/{{programId}}
+Authorization: Bearer {{accessToken}}
+
+### ──────────────────────────────────────────────────────────
+
+### D-2. 대기 정보 조회 (폴링) — ADMITTED 상태일 때 entryToken 자동 저장
+### 권장 간격: 1~2초, ADMITTED 받으면 폴링 중단
+# @name queueStatus
+GET {{baseUrl}}/api/v1/queues/programs/{{programId}}
+Authorization: Bearer {{accessToken}}
+
+> {%
+  if (response.body.data.status === "ADMITTED") {
+    client.global.set("entryToken", response.body.data.entryToken);
+  }
+%}
+
+
+### ============================================================
+###  E. SEAT — 좌석
+### ============================================================
+
+### E-1. 예매 세션 토큰 발급 (entryToken 필요)
+# @name bookingSession
+POST {{baseUrl}}/api/v1/bookings/{{programId}}/session
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+Booking-Entry-Token: Bearer {{entryToken}}
+
+> {%
+  client.global.set("sessionToken", response.body.data.sessionToken);
+%}
+
+### ──────────────────────────────────────────────────────────
+
+### E-2. 좌석 목록 조회 (잔여 수 포함)
+# @name seatList
+GET {{baseUrl}}/api/v1/seats/schedules/{{scheduleId}}
+Authorization: Bearer {{accessToken}}
+
+> {%
+  client.global.set("seatId1", response.body.data.sections[0].seats[0].seatId);
+  client.global.set("seatId2", response.body.data.sections[0].seats[1].seatId);
+%}
+
+### ──────────────────────────────────────────────────────────
+
+### E-3. 좌석 선점 (sessionToken 필수, TTL 10분)
+POST {{baseUrl}}/api/v1/seats/schedules/{{scheduleId}}/hold
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+Booking-Session-Token: Bearer {{sessionToken}}
+
+{
+  "seatIds": [
+    "{{seatId1}}",
+    "{{seatId2}}"
+  ]
+}
+
+### ──────────────────────────────────────────────────────────
+
+### E-4. 선점 중인 좌석 조회
+GET {{baseUrl}}/api/v1/seats/schedules/{{scheduleId}}/hold
+Authorization: Bearer {{accessToken}}
+Booking-Session-Token: Bearer {{sessionToken}}
+
+### ──────────────────────────────────────────────────────────
+
+### E-5. 좌석 선점 취소
+DELETE {{baseUrl}}/api/v1/seats/schedules/{{scheduleId}}/hold
+Authorization: Bearer {{accessToken}}
+Booking-Session-Token: Bearer {{sessionToken}}
+
+
+### ============================================================
+###  F. BOOKING — 예매
+### ============================================================
+
+### F-1. 예매 생성 (sessionToken 필수)
+# @name createBooking
+POST {{baseUrl}}/api/v1/bookings
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+Booking-Session-Token: Bearer {{sessionToken}}
+
+{
+  "programId": "{{programId}}",
+  "scheduleId": "{{scheduleId}}",
+  "seatList": [
+    "{{seatId1}}",
+    "{{seatId2}}"
+  ]
+}
+
+> {%
+  client.global.set("bookingPaymentId", response.body.data.paymentId);
+  client.global.set("bookingOrderId", response.body.data.orderId);
+  client.global.set("bookingId", response.body.data.bookingId);
+%}
+
+### ──────────────────────────────────────────────────────────
+
+### F-2. 예매 단건 조회
+GET {{baseUrl}}/api/v1/bookings/my/{{bookingId}}
+Authorization: Bearer {{accessToken}}
+
+### ──────────────────────────────────────────────────────────
+
+### F-3. 예매 목록 조회
+GET {{baseUrl}}/api/v1/bookings/my?page=0&size=10
+Authorization: Bearer {{accessToken}}
+
+
+### ============================================================
+###  G. PAYMENT — 결제
+### ============================================================
+
+### G-1. 결제창 실행
+###     ⚠️ .http 파일에서 실행 불가 — 브라우저에서 아래 URL 직접 접속
+###     http://localhost:8084/internal/v1/payments/payment-page?orderId={bookingOrderId}&amount=100000
+
+### ──────────────────────────────────────────────────────────
+
+### G-2. 결제 상세 조회
+# @name getPayment
+GET {{baseUrl}}/api/v1/payments/{{bookingPaymentId}}
+Authorization: Bearer {{accessToken}}
+
+> {%
+  client.global.set("paymentId", response.body.data.paymentId);
+%}
+
+### ──────────────────────────────────────────────────────────
+
+### G-3. 환불 요청
+POST {{baseUrl}}/api/v1/payments/{{paymentId}}/refund
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "cancelReason": "단순 변심"
+}
+
+### ──────────────────────────────────────────────────────────
+
+### G-4. 본인 결제 목록 조회
+GET {{baseUrl}}/api/v1/payments/me
+Authorization: Bearer {{accessToken}}
