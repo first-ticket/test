@@ -280,7 +280,8 @@ Authorization: Bearer {{hostAccessToken}}
 # @name createSchedule
 < {%
     var d = new Date(Date.now() + 60 * 1000);
-    var now = d.toISOString().slice(0, 19);
+    var kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+    var now = kst.toISOString().slice(0, 19);
     client.global.set("nowDateTime", now);
 %}
 POST {{baseUrl}}/api/v1/programs/{{programId}}/schedules
@@ -452,7 +453,7 @@ Authorization: Bearer {{accessToken}}
 
 ### G-1. 결제창 실행
 ###     ⚠️ .http 파일에서 실행 불가 — 브라우저에서 아래 URL 직접 접속
-###     로컬 테스트: http://localhost:8084/api/v1/payments/payment-page?orderId={bookingOrderId}&amount=140000
+###     로컬 테스트: http://localhost:80/api/v1/payments/payment-page?orderId={bookingOrderId}&amount=140000
 ###     배포 테스트: http://first-ticket-alb-820706462.ap-northeast-2.elb.amazonaws.com/api/v1/payments/payment-page?orderId={bookingOrderId}&amount=140000
 
 ### ──────────────────────────────────────────────────────────
