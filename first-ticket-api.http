@@ -293,8 +293,7 @@ Authorization: Bearer {{hostAccessToken}}
   "eventStartAt": "2026-06-03T19:00:00",
   "eventEndAt":   "2026-06-03T21:00:00",
   "saleStartAt":  "{{nowDateTime}}",
-  "saleEndAt":    "2026-05-31T23:59:59",
-  "totalCapacity": 100
+  "saleEndAt":    "2026-05-31T23:59:59"
 }
 
 > {%
