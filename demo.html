@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>First Ticket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*,::before,::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --teal:#2dcfb3;--teal2:#22b89f;--teal3:#1a9e88;
+  --teal-l:#edfaf7;--teal-m:rgba(45,207,179,.12);--teal-b:rgba(45,207,179,.2);
+  --ink:#0d1b2a;--ink2:#3d5a73;--ink3:#7a97ad;
+  --bg:#f5f7fa;--bg2:#eef1f5;--bg3:#e4e9f0;
+  --white:#ffffff;
+  --border:#dde3ec;--border2:#c8d3de;
+  --red:#e84055;--red-l:#fff0f2;--red-b:rgba(232,64,85,.2);
+  --gold:#d4a017;--gold-l:#fffbee;
+  --green:#18a35a;--green-l:#effaf4;
+  --sh:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04);
+  --sh2:0 8px 32px rgba(0,0,0,.1);
+  --sh3:0 20px 60px rgba(0,0,0,.12);
+  --r:8px;--r2:12px;--r3:18px;
+}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* Screens */
+.screen{display:none;min-height:100vh}
+.screen.active{display:block;animation:fu .3s ease both}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
+
+/* Toast */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:var(--r);font-size:13px;font-weight:500;opacity:0;transition:.3s;z-index:9999;pointer-events:none;white-space:nowrap;box-shadow:var(--sh2)}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{background:var(--teal3)}
+#toast.err{background:var(--red)}
+
+/* Loader */
+#loader{position:fixed;inset:0;background:rgba(245,247,250,.8);backdrop-filter:blur(4px);z-index:9000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+#loader.on{display:flex}
+.spin{width:36px;height:36px;border:3px solid var(--bg3);border-top-color:var(--teal);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.ld-txt{font-size:13px;color:var(--ink2)}
+
+/* Logo */
+.logo{display:flex;align-items:center;gap:9px;cursor:pointer;text-decoration:none}
+.logo-icon{width:30px;height:30px}
+.logo-text{font-family:'Outfit',sans-serif;font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.3px}
+.logo-text b{color:var(--teal);font-weight:700}
+
+/* Nav */
+nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 36px;height:60px;gap:0}
+.nav-center{display:flex;gap:24px;margin-left:28px;flex:1}
+.nl{font-size:13px;font-weight:500;color:var(--ink2);cursor:pointer;padding:4px 0;border-bottom:2px solid transparent;transition:.15s}
+.nl:hover,.nl.on{color:var(--teal);border-color:var(--teal)}
+.nav-r{display:flex;align-items:center;gap:10px;margin-left:auto}
+.nav-role{font-size:10px;font-weight:700;letter-spacing:.8px;padding:3px 10px;border-radius:20px;text-transform:uppercase}
+.role-c{background:var(--teal-l);color:var(--teal3);border:1px solid var(--teal-b)}
+.role-h{background:#eff4ff;color:#3b5bdb;border:1px solid #c5d3f5}
+.role-a{background:#fff5f0;color:#c84b00;border:1px solid #fad0bb}
+.nav-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;cursor:pointer}
+.nav-sw{font-size:12px;color:var(--ink3);cursor:pointer;padding:5px 11px;border-radius:6px;border:1px solid var(--border);background:transparent;font-family:'Noto Sans KR',sans-serif;transition:.15s}
+.nav-sw:hover{background:var(--bg2);color:var(--ink2)}
+
+/* Btn */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:var(--r);font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;cursor:pointer;border:none;transition:.15s;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+.btn-teal{background:var(--teal);color:#fff}.btn-teal:hover{background:var(--teal2)}
+.btn-teal-o{background:var(--teal-l);color:var(--teal3);border:1.5px solid var(--teal-b)}.btn-teal-o:hover{background:var(--teal-m)}
+.btn-ghost{background:var(--bg2);color:var(--ink2);border:1px solid var(--border)}.btn-ghost:hover{background:var(--bg3);color:var(--ink)}
+.btn-red{background:var(--red-l);color:var(--red);border:1px solid var(--red-b)}.btn-red:hover{background:#ffe4e7}
+.btn-lg{padding:13px 26px;font-size:15px}.btn-sm{padding:7px 13px;font-size:12px}.btn-w{width:100%}
+
+/* Fld */
+.fld{margin-bottom:14px}
+.fld label{display:block;font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--ink3);text-transform:uppercase;margin-bottom:5px}
+.fld input,.fld select,.fld textarea{width:100%;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);color:var(--ink);font-size:14px;font-family:'Noto Sans KR',sans-serif;padding:10px 12px;outline:none;transition:.15s}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(45,207,179,.1)}
+.fld textarea{resize:vertical;min-height:80px}
+.fld select option{background:var(--white);color:var(--ink)}
+.frow{display:flex;gap:12px}.frow .fld{flex:1}
+
+/* Card */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:24px;box-shadow:var(--sh)}
+
+/* Bdg */
+.bdg{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.4px;padding:3px 9px;border-radius:20px;text-transform:uppercase}
+.bdg-teal{background:var(--teal-l);color:var(--teal3);border:1px solid var(--teal-b)}
+.bdg-red{background:var(--red-l);color:var(--red);border:1px solid var(--red-b)}
+.bdg-gold{background:var(--gold-l);color:var(--gold)}
+.bdg-green{background:var(--green-l);color:var(--green)}
+.bdg-gray{background:var(--bg2);color:var(--ink3);border:1px solid var(--border)}
+
+/* Layout */
+.ctr{max-width:1160px;margin:0 auto;padding:0 36px}
+.pp{padding-top:44px;padding-bottom:60px}
+
+/* ═══ LOGIN ═══ */
+#screen-login{background:var(--white);min-height:100vh;background-image:radial-gradient(ellipse 70% 60% at 85% 20%,rgba(45,207,179,.07) 0%,transparent 60%),radial-gradient(ellipse 50% 50% at 15% 85%,rgba(45,207,179,.05) 0%,transparent 60%)}
+#screen-login.active{display:flex;align-items:center;justify-content:center}
+.login-grid{display:grid;grid-template-columns:1fr 400px;gap:72px;align-items:center;max-width:880px;width:100%;padding:0 36px}
+.login-left .ll-logo{display:flex;align-items:center;gap:11px;margin-bottom:28px}
+.login-left .ll-ico{width:48px;height:48px}
+.login-left .ll-name{font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-.5px}
+.login-left .ll-name b{color:var(--teal);font-weight:800}
+.login-hl{font-family:'Outfit',sans-serif;font-size:40px;font-weight:800;line-height:1.1;letter-spacing:-1.2px;margin-bottom:14px;color:var(--ink)}
+.login-hl em{color:var(--teal);font-style:normal}
+.login-desc{font-size:15px;color:var(--ink2);line-height:1.75}
+.login-box{background:var(--white);border:1px solid var(--border);border-radius:var(--r3);padding:36px;box-shadow:var(--sh3)}
+.lb-title{font-family:'Outfit',sans-serif;font-size:19px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.lb-sub{font-size:13px;color:var(--ink2);margin-bottom:22px}
+.ldiv{display:flex;align-items:center;gap:10px;margin:16px 0}
+.ldiv::before,.ldiv::after{content:'';flex:1;height:1px;background:var(--border)}
+.ldiv span{font-size:11px;color:var(--ink3)}
+.qb{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:var(--r);border:1.5px solid var(--border);background:var(--bg);cursor:pointer;transition:.15s;margin-bottom:8px;font-family:'Noto Sans KR',sans-serif}
+.qb:last-child{margin-bottom:0}
+.qb:hover{border-color:var(--teal);background:var(--teal-l)}
+.qb-ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0}
+.qb-info .qb-label{font-size:13px;font-weight:600;color:var(--ink)}
+.qb-info .qb-email{font-size:11px;color:var(--ink3);margin-top:1px}
+.qb-arr{color:var(--ink3);margin-left:auto}
+
+/* ═══ HOME ═══ */
+.hero{background:var(--white);border-bottom:1px solid var(--border);padding:52px 0;position:relative;overflow:hidden}
+.hero-deco{position:absolute;top:-60px;right:-60px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(45,207,179,.08) 0%,transparent 65%);pointer-events:none}
+.hero-inner{position:relative;z-index:1}
+.hero-tag{display:inline-flex;align-items:center;gap:7px;background:var(--teal-l);border:1px solid var(--teal-b);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:700;color:var(--teal3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:16px}
+.hero-tag::before{content:'●';font-size:7px;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-title{font-family:'Outfit',sans-serif;font-size:48px;font-weight:800;line-height:1.05;letter-spacing:-1.5px;margin-bottom:12px;color:var(--ink)}
+.hero-title em{color:var(--teal);font-style:normal}
+.hero-desc{font-size:15px;color:var(--ink2);line-height:1.75;margin-bottom:26px;max-width:480px}
+.hero-acts{display:flex;gap:11px;flex-wrap:wrap}
+
+.s-hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:22px}
+.s-title{font-family:'Outfit',sans-serif;font-size:20px;font-weight:700;letter-spacing:-.4px;color:var(--ink)}
+.s-title em{color:var(--teal);font-style:normal}
+
+.cat-tabs{display:flex;gap:7px;flex-wrap:wrap}
+.cat-tab{padding:7px 16px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--white);color:var(--ink2);transition:.15s}
+.cat-tab:hover{border-color:var(--teal);color:var(--teal)}
+.cat-tab.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+
+.ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:20px}
+.ev-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;cursor:pointer;transition:.2s;box-shadow:var(--sh)}
+.ev-card:hover{transform:translateY(-4px);box-shadow:var(--sh2);border-color:var(--border2)}
+.ev-card:hover .ev-emoji{transform:scale(1.06)}
+.ev-thumb{height:185px;background:var(--bg2);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.ev-emoji{font-size:64px;transition:transform .3s ease;user-select:none}
+.ev-stag{position:absolute;top:11px;left:11px;font-size:10px;font-weight:700;letter-spacing:.3px;padding:4px 10px;border-radius:20px}
+.ev-stag.sale{background:var(--red);color:#fff}
+.ev-stag.soon{background:var(--gold);color:#fff}
+.ev-remain{position:absolute;bottom:10px;right:10px;font-size:10px;font-weight:600;background:rgba(255,255,255,.9);border-radius:6px;padding:3px 8px;color:var(--ink2)}
+.ev-body{padding:16px 18px 18px}
+.ev-cat{font-size:10px;font-weight:700;color:var(--ink3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px}
+.ev-title{font-size:15px;font-weight:700;line-height:1.3;margin-bottom:8px;color:var(--ink)}
+.ev-info{font-size:12px;color:var(--ink3);line-height:1.9}
+.ev-price{font-size:14px;font-weight:700;color:var(--teal3);margin-top:9px}
+
+/* ═══ DETAIL ═══ */
+.det-hero{background:var(--ink);padding:44px 0 0;position:relative;overflow:hidden}
+.det-hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 80% 50%,rgba(45,207,179,.15) 0%,transparent 60%)}
+.det-inner{max-width:1160px;margin:0 auto;padding:0 36px;display:flex;gap:36px;align-items:flex-end;position:relative;z-index:1}
+.det-poster{width:185px;min-width:185px;height:255px;border-radius:var(--r2);background:var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:72px;border:2px solid rgba(255,255,255,.08)}
+.det-info{color:#fff;padding-bottom:32px;flex:1}
+.det-cat{font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:9px;text-transform:uppercase}
+.det-title{font-family:'Outfit',sans-serif;font-size:36px;font-weight:800;line-height:1.1;margin-bottom:14px;letter-spacing:-.8px}
+.det-meta{color:rgba(255,255,255,.6);font-size:14px;line-height:2.1}
+.det-meta strong{color:#fff;font-weight:500}
+.det-body{max-width:1160px;margin:0 auto;padding:36px 36px 60px;display:grid;grid-template-columns:1fr 320px;gap:28px}
+.bk-widget{position:sticky;top:72px}
+.sched-list{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.sched-item{padding:12px 14px;border-radius:var(--r);border:1.5px solid var(--border);cursor:pointer;transition:.15s;background:var(--white)}
+.sched-item:hover,.sched-item.on{border-color:var(--teal);background:var(--teal-l)}
+.sched-item.on .sched-d{color:var(--teal3)}
+.sched-d{font-size:14px;font-weight:600;color:var(--ink)}
+.sched-r{font-size:12px;color:var(--ink3);margin-top:2px}
+
+/* ═══ QUEUE ═══ */
+.q-wrap{min-height:calc(100vh - 60px);display:flex;align-items:center;justify-content:center;padding:48px 32px}
+.q-box{width:480px;background:var(--white);border:1px solid var(--border);border-radius:var(--r3);padding:48px;text-align:center;box-shadow:var(--sh3)}
+.q-ico{font-size:52px;margin-bottom:14px;display:block}
+.q-title{font-family:'Outfit',sans-serif;font-size:26px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.q-sub{font-size:14px;color:var(--ink2);margin-bottom:28px;line-height:1.7}
+.q-num{font-family:'Outfit',sans-serif;font-size:76px;font-weight:800;color:var(--teal);line-height:1;margin:6px 0}
+.q-unit{font-size:13px;color:var(--ink3)}
+.q-prog{height:5px;background:var(--bg3);border-radius:3px;margin:22px 0;overflow:hidden}
+.q-bar{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal2));border-radius:3px;transition:width .6s ease}
+.q-msg{font-size:13px;color:var(--ink3)}
+.q-ok{background:var(--green-l);border:1px solid rgba(24,163,90,.2);border-radius:var(--r2);padding:18px 20px;margin-top:22px;text-align:left}
+.q-ok-t{font-size:15px;font-weight:700;color:var(--green);margin-bottom:3px}
+.q-ok-s{font-size:13px;color:var(--green)}
+
+/* ═══ SEATS ═══ */
+#screen-seats{background:var(--bg)}
+.seats-layout{display:grid;grid-template-columns:1fr 300px;min-height:calc(100vh - 60px)}
+.seats-main{padding:28px 32px;overflow-y:auto}
+.stage-lbl{background:var(--ink);color:#fff;border-radius:var(--r);padding:8px 16px;text-align:center;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:24px;opacity:.7;max-width:260px;margin-left:auto;margin-right:auto}
+.seat-sec{margin-bottom:24px}
+.seat-sec-name{font-size:13px;font-weight:700;color:var(--ink2);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.seat-grid-o{overflow-x:auto;padding-bottom:4px}
+.seat-row{display:flex;gap:4px;margin-bottom:4px;align-items:center}
+.row-lbl{font-size:9px;color:var(--ink3);width:18px;text-align:right;flex-shrink:0;margin-right:3px;font-weight:600}
+.seat{width:28px;height:28px;border-radius:5px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;font-size:8px;color:var(--ink3);display:flex;align-items:center;justify-content:center;transition:.12s;flex-shrink:0;font-weight:600}
+.seat:hover:not(.rs):not(.hd){background:var(--teal-l);border-color:var(--teal);color:var(--teal3)}
+.seat.sel{background:var(--teal);border-color:var(--teal);color:#fff;transform:scale(1.08)}
+.seat.rs{background:var(--bg2);border-color:var(--bg3);cursor:not-allowed;color:var(--bg3)}
+.seat.hd{background:var(--gold-l);border-color:var(--gold);color:var(--gold)}
+.seat-legend{display:flex;gap:14px;margin-top:14px;flex-wrap:wrap}
+.leg-i{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink3)}
+.leg-box{width:13px;height:13px;border-radius:3px;border:1.5px solid}
+
+.seats-sb{background:var(--white);border-left:1px solid var(--border);padding:24px;display:flex;flex-direction:column}
+.ss-title{font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:var(--ink);margin-bottom:18px}
+.ss-ev{background:var(--bg);border-radius:var(--r);padding:13px;margin-bottom:18px}
+.ss-ev-name{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.ss-ev-date{font-size:12px;color:var(--ink3)}
+.sel-list{flex:1;min-height:60px}
+.sel-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.sel-seat-info{font-size:13px;color:var(--ink)}
+.sel-seat-price{font-size:13px;font-weight:600;color:var(--teal3)}
+.ss-total{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-top:2px solid var(--border);margin-top:6px}
+.ss-tot-l{font-size:14px;font-weight:700;color:var(--ink)}
+.ss-tot-p{font-family:'Outfit',sans-serif;font-size:22px;font-weight:700;color:var(--teal3)}
+.ss-notice{font-size:11px;color:var(--gold);margin:8px 0 14px;padding:8px 10px;background:var(--gold-l);border-radius:6px;line-height:1.5}
+.tmr-bar{display:flex;align-items:center;gap:8px;background:var(--red-l);border:1px solid var(--red-b);border-radius:var(--r);padding:9px 13px;margin-bottom:10px}
+.tmr-val{font-family:'Outfit',sans-serif;font-size:17px;font-weight:700;color:var(--red);margin-left:auto;font-variant-numeric:tabular-nums}
+
+/* ═══ CONFIRM ═══ */
+.cf-wrap{max-width:580px;margin:0 auto;padding:48px 36px 64px}
+.cf-steps{display:flex;align-items:center;gap:6px;margin-bottom:28px}
+.cf-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:var(--bg2);color:var(--ink3);flex-shrink:0}
+.cf-dot.dn{background:var(--teal);color:#fff}
+.cf-dot.on{background:var(--ink);color:#fff}
+.cf-line{flex:1;height:2px;background:var(--border)}
+.cf-title{font-family:'Outfit',sans-serif;font-size:26px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.cf-desc{font-size:14px;color:var(--ink2);margin-bottom:26px}
+.ord-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:22px;margin-bottom:16px;box-shadow:var(--sh)}
+.ord-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px}
+.ord-row:last-child{border:none}
+.ord-l{color:var(--ink2)}.ord-v{font-weight:500;color:var(--ink)}
+.ord-total{font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;color:var(--teal3)}
+
+/* ═══ SUCCESS ═══ */
+.suc-wrap{min-height:calc(100vh - 60px);display:flex;align-items:center;justify-content:center;padding:48px}
+.suc-box{width:500px;background:var(--white);border:1px solid var(--border);border-radius:var(--r3);padding:48px 44px;text-align:center;box-shadow:var(--sh3)}
+.suc-check{width:72px;height:72px;border-radius:50%;background:var(--teal-l);border:2px solid var(--teal-b);margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:30px;animation:pop .5s cubic-bezier(.175,.885,.32,1.275) both}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.suc-title{font-family:'Outfit',sans-serif;font-size:28px;font-weight:700;color:var(--ink);margin-bottom:7px}
+.suc-desc{font-size:14px;color:var(--ink2);line-height:1.7;margin-bottom:26px}
+.ticket{background:var(--bg);border:1px solid var(--border);border-radius:var(--r2);padding:22px 24px;margin-bottom:22px;text-align:left;position:relative;overflow:hidden}
+.ticket::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--teal)}
+.ticket-perf{position:absolute;top:50%;left:18px;right:18px;transform:translateY(-50%);border-top:2px dashed var(--border)}
+.ticket-hole{position:absolute;width:24px;height:24px;border-radius:50%;background:var(--bg);border:1px solid var(--border);top:50%;transform:translateY(-50%)}
+.ticket-hole.l{left:-12px}.ticket-hole.r{right:-12px}
+.ticket-top{padding-bottom:13px;margin-bottom:13px;border-bottom:2px dashed var(--border)}
+.ticket-ev{font-size:16px;font-weight:700;padding-left:12px;margin-bottom:3px;color:var(--ink)}
+.ticket-date{font-size:12px;color:var(--ink3);padding-left:12px}
+.ticket-bot{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-left:12px}
+.tkt-f label{font-size:10px;color:var(--ink3);display:block;margin-bottom:2px;text-transform:uppercase;letter-spacing:.4px}
+.tkt-f span{font-size:13px;font-weight:600;color:var(--ink)}
+
+/* ═══ MY BOOKINGS ═══ */
+.my-item{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:20px 22px;display:flex;gap:18px;align-items:center;box-shadow:var(--sh);cursor:pointer;transition:.2s;margin-bottom:12px}
+.my-item:hover{box-shadow:var(--sh2);border-color:var(--border2);transform:translateY(-2px)}
+.my-thumb{width:64px;height:84px;border-radius:var(--r);background:var(--bg2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px}
+.my-info{flex:1}
+.my-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.my-meta{font-size:12px;color:var(--ink3);line-height:1.9}
+.my-right{text-align:right}
+.my-price{font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:var(--ink);margin-bottom:5px}
+
+/* ═══ HOST ═══ */
+.host-layout{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 60px)}
+.host-sb{background:var(--white);border-right:1px solid var(--border);padding:20px 0}
+.hm{padding:10px 20px;font-size:13px;color:var(--ink2);cursor:pointer;display:flex;align-items:center;gap:9px;transition:.15s;border-left:3px solid transparent}
+.hm:hover{background:var(--bg2);color:var(--ink)}
+.hm.on{color:var(--teal3);background:var(--teal-l);border-left-color:var(--teal)}
+.hm-ico{font-size:15px;width:20px;text-align:center}
+.host-ctn{padding:28px 32px;overflow-y:auto;background:var(--bg)}
+.h-panel{display:none}.h-panel.on{display:block}
+.h-stat-g{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
+.h-stat{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:18px;box-shadow:var(--sh)}
+.h-stat-v{font-family:'Outfit',sans-serif;font-size:28px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.h-stat-l{font-size:12px;color:var(--ink3)}
+.prog-tbl{width:100%;border-collapse:collapse;background:var(--white);border-radius:var(--r2);overflow:hidden;box-shadow:var(--sh)}
+.prog-tbl th{text-align:left;padding:10px 14px;font-size:11px;font-weight:700;letter-spacing:.4px;color:var(--ink3);border-bottom:2px solid var(--border);text-transform:uppercase;background:var(--bg)}
+.prog-tbl td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--ink2)}
+.prog-tbl tr:last-child td{border:none}
+.prog-tbl tr:hover td{background:var(--teal-l)}
+
+/* ═══ ADMIN ═══ */
+.admin-layout{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 60px)}
+.admin-sb{background:var(--white);border-right:1px solid var(--border);padding:20px 0}
+.am{padding:10px 20px;font-size:13px;color:var(--ink2);cursor:pointer;display:flex;align-items:center;gap:9px;transition:.15s;border-left:3px solid transparent}
+.am:hover{background:var(--bg2)}
+.am.on{color:#c84b00;background:#fff5f0;border-left-color:#c84b00}
+.admin-ctn{padding:28px 32px;overflow-y:auto;background:var(--bg)}
+.a-panel{display:none}.a-panel.on{display:block}
+.req-item{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:16px 20px;display:flex;align-items:center;gap:16px;box-shadow:var(--sh);margin-bottom:10px}
+.req-info{flex:1;font-size:13px;color:var(--ink2)}
+.req-name{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.req-acts{display:flex;gap:8px}
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="spin"></div><div class="ld-txt" id="ldTxt">처리 중...</div></div>
+<div id="toast"></div>
+
+<!-- ═══════════════════════════════════
+     LOGIN
+════════════════════════════════════ -->
+<div id="screen-login" class="screen active">
+  <div class="login-grid">
+    <div class="login-left">
+      <div class="ll-logo">
+        <svg class="ll-ico" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="22" width="104" height="56" rx="10" fill="#2dcfb3"/>
+          <path d="M8 52h12M100 52h12" stroke="white" stroke-width="3" stroke-dasharray="4 3"/>
+          <circle cx="20" cy="52" r="8" fill="white"/>
+          <circle cx="100" cy="52" r="8" fill="white"/>
+          <rect x="32" y="34" width="56" height="32" rx="6" fill="white" opacity=".15"/>
+          <text x="60" y="58" font-family="Outfit" font-size="26" font-weight="800" fill="white" text-anchor="middle">1</text>
+        </svg>
+        <div class="ll-name">first <b>ticket</b></div>
+      </div>
+      <div class="login-hl">공연의 첫 번째<br>티켓은 <em>여기서</em></div>
+      <div class="login-desc">콘서트, 뮤지컬, 스포츠까지<br>최고의 공연을 First Ticket에서 예매하세요</div>
+    </div>
+    <div class="login-box">
+      <!-- 탭 -->
+      <div style="display:flex;gap:0;margin-bottom:22px;border-bottom:2px solid var(--border)">
+        <button id="tabLogin" onclick="switchTab('login')" style="flex:1;padding:10px;font-size:14px;font-weight:700;font-family:'Noto Sans KR',sans-serif;background:transparent;border:none;border-bottom:2px solid var(--teal);margin-bottom:-2px;color:var(--teal);cursor:pointer;transition:.15s">로그인</button>
+        <button id="tabSignup" onclick="switchTab('signup')" style="flex:1;padding:10px;font-size:14px;font-weight:600;font-family:'Noto Sans KR',sans-serif;background:transparent;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--ink3);cursor:pointer;transition:.15s">회원가입</button>
+      </div>
+
+      <!-- 로그인 폼 -->
+      <div id="loginForm">
+        <div class="fld"><label>이메일</label><input id="liEmail" placeholder="이메일을 입력하세요"></div>
+        <div class="fld"><label>비밀번호</label><input type="password" id="liPw" placeholder="비밀번호를 입력하세요"></div>
+        <div id="loginErr" style="display:none;font-size:12px;color:var(--red);margin-bottom:10px;padding:8px 10px;background:var(--red-l);border-radius:var(--r)"></div>
+        <button class="btn btn-teal btn-w btn-lg" onclick="doLogin()" style="margin-bottom:10px">로그인</button>
+      </div>
+
+      <!-- 회원가입 폼 -->
+      <div id="signupForm" style="display:none">
+        <div class="fld"><label>이름</label><input id="suName" placeholder="홍길동"></div>
+        <div class="fld"><label>이메일</label><input id="suEmail" placeholder="example@email.com"></div>
+        <div class="fld"><label>비밀번호</label><input type="password" id="suPw" placeholder="영문+숫자+특수문자 8자 이상"></div>
+        <div class="fld"><label>비밀번호 확인</label><input type="password" id="suPwC" placeholder="비밀번호를 다시 입력하세요"></div>
+        <div id="signupErr" style="display:none;font-size:12px;color:var(--red);margin-bottom:10px;padding:8px 10px;background:var(--red-l);border-radius:var(--r)"></div>
+        <div id="signupOk" style="display:none;font-size:12px;color:var(--green);margin-bottom:10px;padding:8px 10px;background:var(--green-l);border-radius:var(--r)"></div>
+        <button class="btn btn-teal btn-w btn-lg" onclick="doSignup()">회원가입</button>
+        <div style="text-align:center;margin-top:12px;font-size:13px;color:var(--ink3)">
+          이미 계정이 있으신가요?
+          <span onclick="switchTab('login')" style="color:var(--teal);font-weight:600;cursor:pointer">로그인</span>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     HOME (CUSTOMER)
+════════════════════════════════════ -->
+<div id="screen-home" class="screen">
+  <nav>
+    <div class="logo" onclick="go('home')">
+      <svg class="logo-icon" viewBox="0 0 120 100" fill="none"><rect x="8" y="22" width="104" height="56" rx="10" fill="#2dcfb3"/><path d="M8 52h12M100 52h12" stroke="white" stroke-width="3" stroke-dasharray="4 3"/><circle cx="20" cy="52" r="8" fill="white"/><circle cx="100" cy="52" r="8" fill="white"/><text x="60" y="58" font-family="Outfit" font-size="26" font-weight="800" fill="white" text-anchor="middle">1</text></svg>
+      <span class="logo-text">first <b>ticket</b></span>
+    </div>
+    <div class="nav-center">
+      <span class="nl on" onclick="go('home')">홈</span>
+      <span class="nl" onclick="go('my')">내 예매</span>
+    </div>
+    <div class="nav-r">
+      <span class="nav-role role-c" id="nRole">CUSTOMER</span>
+      <div class="nav-av" id="nAv" style="background:#2dcfb3">고</div>
+      <button class="nav-sw" onclick="doLogout()">로그아웃</button>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-deco"></div>
+    <div class="ctr hero-inner">
+      <div class="hero-title">지금 이 순간을<br><em>First Ticket</em>에서</div>
+      <div class="hero-desc">콘서트, 뮤지컬, 스포츠까지 최고의 공연을<br>빠르고 안전하게 예매하세요</div>
+      <div class="hero-acts">
+        <button class="btn btn-teal btn-lg" onclick="document.getElementById('ev-sec').scrollIntoView({behavior:'smooth'})">공연 둘러보기</button>
+        <button class="btn btn-ghost btn-lg" onclick="go('my')">내 예매 확인</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ctr pp" id="ev-sec">
+    <div class="s-hdr">
+      <div class="s-title">지금 <em>예매 중인</em> 공연</div>
+
+    </div>
+    <div class="ev-grid" id="evGrid"></div>
+  </div>
+
+  <div style="border-top:1px solid var(--border);padding:28px 0;text-align:center">
+    <div style="font-size:13px;color:var(--ink3);margin-bottom:10px">공연을 등록하고 싶으신가요?</div>
+    <button class="btn btn-ghost" onclick="requestHost()">HOST 권한 신청</button>
+    <div id="hostReqResult" style="margin-top:10px;font-size:13px"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     DETAIL
+════════════════════════════════════ -->
+<div id="screen-detail" class="screen">
+  <nav>
+    <div class="logo" onclick="go('home')">
+      <svg class="logo-icon" viewBox="0 0 120 100" fill="none"><rect x="8" y="22" width="104" height="56" rx="10" fill="#2dcfb3"/><circle cx="20" cy="52" r="8" fill="white"/><circle cx="100" cy="52" r="8" fill="white"/><text x="60" y="58" font-family="Outfit" font-size="26" font-weight="800" fill="white" text-anchor="middle">1</text></svg>
+      <span class="logo-text">first <b>ticket</b></span>
+    </div>
+    <div class="nav-center"><span class="nl" onclick="go('home')">← 목록으로</span></div>
+    <div class="nav-r"><span class="nav-role role-c">CUSTOMER</span></div>
+  </nav>
+  <div class="det-hero">
+    <div class="det-inner">
+      <div class="det-poster" id="dPoster">🎵</div>
+      <div class="det-info">
+        <div class="det-cat" id="dCat">CONCERT</div>
+        <div class="det-title" id="dTitle">—</div>
+        <div class="det-meta" id="dMeta"></div>
+      </div>
+    </div>
+  </div>
+  <div class="det-body">
+    <div>
+      <div class="card" style="margin-bottom:18px">
+        <div style="font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;margin-bottom:10px;color:var(--ink)">공연 소개</div>
+        <p style="font-size:14px;color:var(--ink2);line-height:1.85" id="dDesc"></p>
+      </div>
+      <div class="card">
+        <div style="font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;margin-bottom:12px;color:var(--ink)">공연 정보</div>
+        <div id="dInfoTbl" style="display:grid;grid-template-columns:auto 1fr;gap:8px 20px;font-size:14px;line-height:1.9"></div>
+      </div>
+    </div>
+    <div class="bk-widget">
+      <div class="card">
+        <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:14px">회차 선택</div>
+        <div class="sched-list" id="schedList"></div>
+        <div id="priceInfo" style="background:var(--bg);border-radius:var(--r);padding:11px;margin-bottom:14px;font-size:13px;color:var(--ink2)"></div>
+        <button class="btn btn-teal btn-w btn-lg" id="resBtn" onclick="startReserve()">좌석 선택하기</button>
+        <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:8px">대기열 통과 후 좌석 선택이 시작됩니다</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     QUEUE
+════════════════════════════════════ -->
+<div id="screen-queue" class="screen">
+  <nav>
+    <div class="logo"><svg class="logo-icon" viewBox="0 0 120 100" fill="none"><rect x="8" y="22" width="104" height="56" rx="10" fill="#2dcfb3"/><circle cx="20" cy="52" r="8" fill="white"/><circle cx="100" cy="52" r="8" fill="white"/><text x="60" y="58" font-family="Outfit" font-size="26" font-weight="800" fill="white" text-anchor="middle">1</text></svg><span class="logo-text">first <b>ticket</b></span></div>
+    <div class="nav-r" style="margin-left:auto"><span class="nav-role role-c">CUSTOMER</span></div>
+  </nav>
+  <div class="q-wrap">
+    <div class="q-box">
+      <span class="q-ico">🎟️</span>
+      <div class="q-title">대기열에 입장했습니다</div>
+      <div class="q-sub">순번이 되면 자동으로 좌석 선택 화면으로<br>이동합니다. 브라우저를 닫지 마세요.</div>
+      <div id="qWait">
+        <div class="q-num" id="qNum">—</div>
+        <div class="q-unit">번째 대기 중</div>
+        <div class="q-prog"><div class="q-bar" id="qBar" style="width:0%"></div></div>
+        <div class="q-msg" id="qMsg">잠시 기다려 주세요...</div>
+        <div style="margin-top:20px"><button class="btn btn-ghost btn-sm" onclick="go('home')">취소하고 돌아가기</button></div>
+      </div>
+      <div id="qOk" style="display:none">
+        <div class="q-ok">
+          <div class="q-ok-t">✅ 입장이 확정되었습니다!</div>
+          <div class="q-ok-s">지금 바로 좌석을 선택하세요. 예매 세션은 20분간 유효합니다.</div>
+        </div>
+        <button class="btn btn-teal btn-w btn-lg" style="margin-top:18px" onclick="proceedSeats()">좌석 선택하기 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SEATS
+════════════════════════════════════ -->
+<div id="screen-seats" class="screen">
+  <nav>
+    <div class="logo" onclick="go('home')" style="cursor:pointer"><svg class="logo-icon" viewBox="0 0 120 100" fill="none"><rect x="8" y="22" width="104" height="56" rx="10" fill="#2dcfb3"/><circle cx="20" cy="52" r="8" fill="white"/><circle cx="100" cy="52" r="8" fill="white"/><text x="60" y="58" font-family="Outfit" font-size="26" font-weight="800" fill="white" text-anchor="middle">1</text></svg><span class="logo-text">first <b>ticket</b></span></div>
+    <div style="flex:1;padding-left:14px">
+      <span style="font-size:13px;font-weight:600;color:var(--ink)" id="sNavEv">—</span>
+      <span style="font-size:12px;color:var(--ink3);margin-left:8px" id="sNavDt"></span>
+    </div>
+    <div class="nav-r" style="gap:6px">
+      <span style="font-size:12px;color:var(--ink3)">선점 만료까지</span>
+      <span style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:var(--red);font-variant-numeric:tabular-nums" id="navTmr">—</span>
+    </div>
+  </nav>
+  <div class="seats-layout">
+    <div class="seats-main">
+      <div class="stage-lbl">STAGE</div>
+      <div id="seatSecs"></div>
+      <div class="seat-legend">
+        <div class="leg-i"><div class="leg-box" style="background:var(--white);border-color:var(--border)"></div>선택 가능</div>
+        <div class="leg-i"><div class="leg-box" style="background:var(--teal);border-color:var(--teal)"></div>선택됨</div>
+        <div class="leg-i"><div class="leg-box" style="background:var(--bg2);border-color:var(--bg3)"></div>예매 완료</div>
+      </div>
+    </div>
+    <div class="seats-sb">
+      <div class="ss-title">선택한 좌석</div>
+      <div class="ss-ev"><div class="ss-ev-name" id="ssEvN">—</div><div class="ss-ev-date" id="ssEvD">—</div></div>
+      <div class="sel-list" id="selList"><div style="color:var(--ink3);font-size:13px;padding:8px 0">좌석을 클릭하여 선택하세요</div></div>
+      <div class="ss-total"><span class="ss-tot-l">합계</span><span class="ss-tot-p" id="ssTotal">0원</span></div>
+      <button class="btn btn-teal btn-w btn-lg" id="holdBtn" onclick="doHold()" disabled>예매하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     CONFIRM
+════════════════════════════════════ -->
+<div id="screen-confirm" class="screen">
+  <nav>
+    <div class="logo" onclick="go('home')" style="cursor:pointer"><svg class="logo-icon" viewBox="0 0 120 100" fill="none"><rect x="8" y="22" width="104" height="56" rx="10" fill="#2dcfb3"/><circle cx="20" cy="52" r="8" fill="white"/><circle cx="100" cy="52" r="8" fill="white"/><text x="60" y="58" font-family="Outfit" font-size="26" font-weight="800" fill="white" text-anchor="middle">1</text></svg><span class="logo-text">first <b>ticket</b></span></div>
+    <div class="nav-r" style="gap:6px;margin-left:auto">
+      <span style="font-size:12px;color:var(--ink3)">남은 시간</span>
+      <span style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:var(--red);font-variant-numeric:tabular-nums" id="cfTmr">—</span>
+    </div>
+  </nav>
+  <div style="background:var(--bg);min-height:calc(100vh - 60px)">
+    <div class="cf-wrap">
+      <div class="cf-steps" style="margin-bottom:28px">
+        <div class="cf-dot dn">✓</div><div class="cf-line"></div>
+        <div class="cf-dot dn">✓</div><div class="cf-line"></div>
+        <div class="cf-dot on">3</div><div class="cf-line"></div>
+        <div class="cf-dot">4</div>
+      </div>
+      <div class="cf-title">예매 정보 확인</div>
+      <div class="cf-desc">아래 내용을 확인하고 결제를 진행하세요</div>
+      <div class="ord-card">
+        <div class="ord-row"><span class="ord-l">공연</span><span class="ord-v" id="cfEv">—</span></div>
+        <div class="ord-row"><span class="ord-l">일시</span><span class="ord-v" id="cfDt">—</span></div>
+        <div class="ord-row"><span class="ord-l">장소</span><span class="ord-v" id="cfVn">—</span></div>
+        <div class="ord-row"><span class="ord-l">좌석</span><span class="ord-v" id="cfSt">—</span></div>
+        <div class="ord-row" style="border-bottom:2px solid var(--border)"><span class="ord-l">합계</span><span class="ord-total" id="cfTot">—</span></div>
+      </div>
+      <button class="btn btn-teal btn-w btn-lg" onclick="doBooking()">결제하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SUCCESS
+════════════════════════════════════ -->
+<div id="screen-success" class="screen">
+  <nav><div class="logo"><svg class="logo-icon" viewBox="0 0 120 100" fill="none"><rect x="8" y="22" width="104" height="56" rx="10" fill="#2dcfb3"/><circle cx="20" cy="52" r="8" fill="white"/><circle cx="100" cy="52" r="8" fill="white"/><text x="60" y="58" font-family="Outfit" font-size="26" font-weight="800" fill="white" text-anchor="middle">1</text></svg><span class="logo-text">first <b>ticket</b></span></div></nav>
+  <div style="background:var(--bg);min-height:calc(100vh - 60px)">
+    <div class="suc-wrap">
+      <div class="suc-box">
+        <div class="suc-check">🎉</div>
+        <div class="suc-title">예매가 완료되었습니다</div>
+        <div class="suc-desc">결제가 성공적으로 처리되었습니다<br>아래 티켓을 저장하거나 캡처해 두세요</div>
+        <div class="ticket">
+          <div class="ticket-hole l"></div><div class="ticket-hole r"></div>
+          <div class="ticket-top">
+            <div class="ticket-ev" id="tkEv">—</div>
+            <div class="ticket-date" id="tkDt">—</div>
+          </div>
+          <div class="ticket-bot">
+            <div class="tkt-f"><label>좌석</label><span id="tkSt">—</span></div>
+            <div class="tkt-f"><label>금액</label><span id="tkPr" style="color:var(--teal3)">—</span></div>
+            <div class="tkt-f" style="grid-column:1/-1"><label>예매번호</label><span id="tkId" style="font-family:monospace;font-size:11px;color:var(--ink3)">—</span></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:center;margin-bottom:16px">
+          <button class="btn btn-ghost" onclick="go('my')">내 예매 보기</button>
+          <button class="btn btn-teal" onclick="go('home')">홈으로</button>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:14px">
+          <button class="btn btn-red btn-w btn-sm" onclick="doRefund()">예매 취소 / 환불 요청</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     MY BOOKINGS
+════════════════════════════════════ -->
+<div id="screen-my" class="screen">
+  <nav>
+    <div class="logo" onclick="go('home')"><svg class="logo-icon" viewBox="0 0 120 100" fill="none"><rect x="8" y="22" width="104" height="56" rx="10" fill="#2dcfb3"/><circle cx="20" cy="52" r="8" fill="white"/><circle cx="100" cy="52" r="8" fill="white"/><text x="60" y="58" font-family="Outfit" font-size="26" font-weight="800" fill="white" text-anchor="middle">1</text></svg><span class="logo-text">first <b>ticket</b></span></div>
+    <div class="nav-center"><span class="nl" onclick="go('home')">홈</span><span class="nl on">내 예매</span></div>
+    <div class="nav-r"><span class="nav-role role-c" id="nRole2">CUSTOMER</span><div class="nav-av" id="nAv2" style="background:#2dcfb3">고</div></div>
+  </nav>
+  <div style="background:var(--bg);min-height:calc(100vh - 60px)">
+    <div class="ctr pp">
+      <div style="margin-bottom:24px"><div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:700;color:var(--ink)">내 예매 내역</div></div>
+      <div id="myList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 예매 단건 조회 모달 -->
+<div id="bookingModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:8000;align-items:center;justify-content:center">
+  <div style="background:var(--white);border-radius:var(--r3);padding:32px;width:480px;max-width:92vw;box-shadow:var(--sh3);position:relative">
+    <button onclick="document.getElementById('bookingModal').style.display='none'" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink3)">✕</button>
+    <div style="font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;color:var(--ink);margin-bottom:20px">예매 상세</div>
+    <div id="bookingModalContent"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     HOST
+════════════════════════════════════ -->
+<div id="screen-host" class="screen">
+  <nav>
+    <div class="logo"><svg class="logo-icon" viewBox="0 0 120 100" fill="none"><rect x="8" y="22" width="104" height="56" rx="10" fill="#2dcfb3"/><circle cx="20" cy="52" r="8" fill="white"/><circle cx="100" cy="52" r="8" fill="white"/><text x="60" y="58" font-family="Outfit" font-size="26" font-weight="800" fill="white" text-anchor="middle">1</text></svg><span class="logo-text">first <b>ticket</b></span></div>
+    <div class="nav-r" style="margin-left:auto">
+      <span class="nav-role role-h">HOST</span>
+      <div class="nav-av" style="background:#3b5bdb">호</div>
+      <button class="nav-sw" onclick="doLogout()">로그아웃</button>
+    </div>
+  </nav>
+  <div class="host-layout">
+    <div class="host-sb">
+      <div style="padding:12px 20px 8px;font-size:10px;font-weight:700;color:var(--ink3);letter-spacing:.8px;text-transform:uppercase">HOST 메뉴</div>
+      <div class="hm on" onclick="hMenu(this,'dash')"><span class="hm-ico">📊</span>대시보드</div>
+      <div class="hm" onclick="hMenu(this,'venue')"><span class="hm-ico">🏟</span>공연장 등록</div>
+      <div class="hm" onclick="hMenu(this,'prog')"><span class="hm-ico">🎭</span>프로그램 등록</div>
+      <div class="hm" onclick="hMenu(this,'sched')"><span class="hm-ico">📅</span>스케줄 & 가격</div>
+      <div class="hm" onclick="hMenu(this,'pub')"><span class="hm-ico">🚀</span>판매 시작</div>
+    </div>
+    <div class="host-ctn">
+
+      <div class="h-panel on" id="h-dash">
+        <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:20px">대시보드</div>
+        <div class="h-stat-g">
+          <div class="h-stat"><div class="h-stat-v" id="hSv">—</div><div class="h-stat-l">등록된 공연장</div></div>
+          <div class="h-stat"><div class="h-stat-v" id="hSp">—</div><div class="h-stat-l">등록된 프로그램</div></div>
+          <div class="h-stat"><div class="h-stat-v" id="hSo">—</div><div class="h-stat-l">판매 중</div></div>
+        </div>
+        <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:12px">등록된 프로그램</div>
+        <table class="prog-tbl"><thead><tr><th>프로그램명</th><th>카테고리</th><th>상태</th><th>스케줄</th><th></th></tr></thead><tbody id="hTbl"><tr><td colspan="5" style="text-align:center;color:var(--ink3);padding:28px">등록된 프로그램이 없습니다</td></tr></tbody></table>
+      </div>
+
+      <div class="h-panel" id="h-venue">
+        <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:20px">공연장 등록</div>
+        <div class="card" style="max-width:600px">
+          <div class="frow"><div class="fld"><label>공연장 이름 *</label><input id="hVn" value="올림픽 체조경기장"></div><div class="fld"><label>주소 *</label><input id="hVa" value="서울 송파구 올림픽로 424"></div></div>
+          <div style="font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:10px">구역 설정</div>
+          <div class="frow"><div class="fld"><label>구역명</label><input id="hSn" value="1층 지정석"></div><div class="fld" style="max-width:90px"><label>행</label><input id="hR" type="number" value="10"></div><div class="fld" style="max-width:90px"><label>열</label><input id="hC" type="number" value="20"></div></div>
+          <button class="btn btn-teal" onclick="hVenue()">공연장 등록</button>
+          <div id="hVr" style="margin-top:10px;font-size:13px;color:var(--green)"></div>
+        </div>
+      </div>
+
+      <div class="h-panel" id="h-prog">
+        <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:20px">프로그램 등록</div>
+        <div class="card" style="max-width:600px">
+          <div class="fld"><label>공연 제목 *</label><input id="hPt" value="2026 월드 투어 콘서트"></div>
+          <div class="frow"><div class="fld"><label>카테고리</label><select id="hPc"><option>CONCERT</option><option>MUSICAL</option><option>SPORTS</option></select></div><div class="fld"><label>테마</label><select id="hPh"><option>MUSIC</option><option>DRAMA</option><option>COMEDY</option></select></div><div class="fld"><label>지역</label><select id="hPr"><option>SEOUL</option><option>BUSAN</option><option>DAEGU</option></select></div></div>
+          <div class="fld"><label>공연 소개</label><textarea id="hPd">최고의 아티스트와 함께하는 여름 콘서트</textarea></div>
+          <button class="btn btn-teal" onclick="hProg()">프로그램 등록</button>
+          <div id="hPres" style="margin-top:10px;font-size:13px;color:var(--green)"></div>
+        </div>
+      </div>
+
+      <div class="h-panel" id="h-sched">
+        <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:20px">스케줄 & 가격 등록</div>
+        <div class="card" style="max-width:600px;margin-bottom:14px">
+          <div style="font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:10px">스케줄 등록</div>
+          <div class="frow"><div class="fld"><label>공연 시작</label><input id="hEs" type="datetime-local" value="2026-06-03T19:00"></div><div class="fld"><label>공연 종료</label><input id="hEe" type="datetime-local" value="2026-06-03T21:00"></div></div>
+          <div class="frow"><div class="fld"><label>판매 시작</label><input id="hSs" type="datetime-local"></div><div class="fld"><label>판매 종료</label><input id="hSe" type="datetime-local" value="2026-05-31T23:59"></div></div>
+          <button class="btn btn-teal" onclick="hSched()">스케줄 등록</button>
+          <div id="hScr" style="margin-top:10px;font-size:13px;color:var(--green)"></div>
+        </div>
+        <div class="card" style="max-width:600px">
+          <div style="font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:10px">가격 등급 추가</div>
+          <div class="frow"><div class="fld"><label>등급명</label><input id="hGl" value="일반석"></div><div class="fld" style="max-width:140px"><label>가격 (원)</label><input id="hGp" type="number" value="70000"></div></div>
+          <button class="btn btn-teal-o" onclick="hGrade()">가격 등급 추가</button>
+          <div id="hGr" style="margin-top:10px;font-size:13px;color:var(--green)"></div>
+        </div>
+      </div>
+
+      <div class="h-panel" id="h-pub">
+        <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:20px">판매 시작</div>
+        <div class="card" style="max-width:500px">
+          <div style="background:var(--gold-l);border:1px solid rgba(212,160,23,.3);border-radius:var(--r);padding:13px;margin-bottom:18px;font-size:13px;color:var(--gold);line-height:1.6">⚠️ 모든 스케줄에 가격 등급이 1개 이상 있어야 합니다.<br>DRAFT → ON_SALE 상태로 전환됩니다.</div>
+          <div class="fld"><label>Program ID</label><input id="hPid" placeholder="프로그램 등록 후 자동 입력됩니다"></div>
+          <button class="btn btn-teal btn-lg" onclick="hPublish()">🚀 판매 시작 (ON_SALE)</button>
+          <div id="hPubr" style="margin-top:10px;font-size:13px"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     ADMIN
+════════════════════════════════════ -->
+<div id="screen-admin" class="screen">
+  <nav>
+    <div class="logo"><svg class="logo-icon" viewBox="0 0 120 100" fill="none"><rect x="8" y="22" width="104" height="56" rx="10" fill="#2dcfb3"/><circle cx="20" cy="52" r="8" fill="white"/><circle cx="100" cy="52" r="8" fill="white"/><text x="60" y="58" font-family="Outfit" font-size="26" font-weight="800" fill="white" text-anchor="middle">1</text></svg><span class="logo-text">first <b>ticket</b></span></div>
+    <div class="nav-r" style="margin-left:auto">
+      <span class="nav-role role-a">ADMIN</span>
+      <div class="nav-av" style="background:#c84b00">관</div>
+      <button class="nav-sw" onclick="doLogout()">로그아웃</button>
+    </div>
+  </nav>
+  <div class="admin-layout">
+    <div class="admin-sb">
+      <div style="padding:12px 20px 8px;font-size:10px;font-weight:700;color:var(--ink3);letter-spacing:.8px;text-transform:uppercase">ADMIN 메뉴</div>
+      <div class="am on" onclick="aMenu(this,'dash')">📊 대시보드</div>
+      <div class="am" onclick="aMenu(this,'host-req')">📋 HOST 신청 관리</div>
+      <div class="am" onclick="aMenu(this,'users')">👤 회원 관리</div>
+    </div>
+    <div class="admin-ctn">
+
+      <div class="a-panel on" id="a-dash">
+        <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:20px">관리자 대시보드</div>
+        <div class="h-stat-g">
+          <div class="h-stat"><div class="h-stat-v" id="aSu">—</div><div class="h-stat-l">전체 회원</div></div>
+          <div class="h-stat"><div class="h-stat-v" id="aSh">—</div><div class="h-stat-l">HOST 수</div></div>
+          <div class="h-stat"><div class="h-stat-v" id="aSp">—</div><div class="h-stat-l">진행 중 공연</div></div>
+          <div class="h-stat"><div class="h-stat-v" id="aSr">—</div><div class="h-stat-l">대기 중 신청</div></div>
+        </div>
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:20px;box-shadow:var(--sh)">
+          <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px">빠른 작업</div>
+          <div style="font-size:13px;color:var(--ink2);margin-bottom:14px">HOST 신청 심사를 처리하세요</div>
+          <button class="btn btn-teal" onclick="aMenu(document.querySelector('.am:nth-child(3)'),'host-req')">HOST 신청 관리 →</button>
+        </div>
+      </div>
+
+      <div class="a-panel" id="a-host-req">
+        <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:8px">HOST 신청 관리</div>
+        <div style="font-size:13px;color:var(--ink2);margin-bottom:20px">대기 중인 HOST 권한 신청을 검토하고 승인 또는 거절하세요</div>
+        <button class="btn btn-teal-o btn-sm" onclick="loadHostRequests()" style="margin-bottom:16px">🔄 새로고침</button>
+        <div id="pendingReqs"><div style="text-align:center;padding:40px;color:var(--ink3)">새로고침을 눌러 신청 목록을 불러오세요</div></div>
+      </div>
+
+      <div class="a-panel" id="a-users">
+        <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:20px">회원 관리</div>
+        <div class="card">
+          <div style="font-size:13px;color:var(--ink2);margin-bottom:14px">현재 로그인된 계정 정보</div>
+          <button class="btn btn-teal-o btn-sm" onclick="loadMyInfo()">내 정보 조회</button>
+          <div id="myInfoResult" style="margin-top:12px"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Config & State ────────────────────────────────────────────
+const CFG = { base: 'http://first-ticket-alb-820706462.ap-northeast-2.elb.amazonaws.com' };
+
+
+const S = {
+  role: 'customer',
+  tok: { access: null, host: null, admin: null, entry: null, session: null, temp: null },
+  ids: { venue: null, section: null, prog: null, sched: null, booking: null, orderId: null, payId: null, reqId: null },
+  ev: null, sched: null,
+  selectedSeats: [],
+  holdEnd: null, holdTmr: null, qTmr: null,
+  myBookings: [],
+};
+
+// 목업 데이터 없음 (실제 API 사용)
+
+
+// ── API ───────────────────────────────────────────────────────
+const PUBLIC_PATHS = [
+  '/api/v1/auth/signup', '/api/v1/auth/login',
+  '/api/v1/auth/token/refresh', '/actuator',
+];
+
+async function api(method, path, body, hdrs = {}) {
+  // PUBLIC_PATHS 제외하고 accessToken 자동 주입
+  const isPublic = PUBLIC_PATHS.some(p => path.startsWith(p));
+  const activeTok = S.tok.access || S.tok.host || S.tok.admin;
+  const autoAuth = (!isPublic && activeTok && !hdrs['Authorization'])
+    ? { Authorization: `Bearer ${activeTok}` } : {};
+  try {
+    const r = await fetch(CFG.base + path, {
+      method,
+      headers: { 'Content-Type': 'application/json', ...autoAuth, ...hdrs },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await r.json().catch(() => ({}));
+    return { ok: r.ok, status: r.status, data };
+  } catch(e) {
+    return { ok: false, status: 0, data: { error: e.message } };
+  }
+}
+
+function authH(tok) {
+  if (!tok) return {};
+  return { Authorization: `Bearer ${tok}` };
+}
+function sessionH() { return { ...authH(S.tok.access), 'Booking-Session-Token': `Bearer ${S.tok.session}` }; }
+function entryH() { return { ...authH(S.tok.access), 'Booking-Entry-Token': `Bearer ${S.tok.entry}` }; }
+
+// ── UI Helpers ────────────────────────────────────────────────
+function go(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + screen).classList.add('active');
+  if (screen === 'home') loadPrograms().then(() => renderEvts(curCat));
+  if (screen === 'my') renderMy();
+  if (screen === 'host') hDash();
+  if (screen === 'admin') aRefreshDash();
+}
+
+function toast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'on' + (type ? ' ' + type : '');
+  setTimeout(() => t.className = '', 2800);
+}
+
+function load(on, txt = '처리 중...') {
+  document.getElementById('loader').className = on ? 'on' : '';
+  document.getElementById('ldTxt').textContent = txt;
+}
+
+// ── Auth ──────────────────────────────────────────────────────
+async function requestHost() {
+  load(true, 'HOST 권한 신청 중...');
+  const r = await api('POST', '/api/v1/users/me/host-requests', null, authH(S.tok.access));
+  load(false);
+  const el = document.getElementById('hostReqResult');
+  if (r.ok) {
+    el.style.color = 'var(--green)';
+    el.textContent = '✅ HOST 신청이 완료되었습니다. 관리자 승인 후 이용 가능합니다.';
+  } else {
+    el.style.color = 'var(--red)';
+    el.textContent = '❌ ' + (r.data?.message || '신청 실패');
+  }
+}
+
+function roleFromJwt(tok) {
+  try {
+    const payload = JSON.parse(atob(tok.split('.')[1]));
+    const roles = payload.realm_access?.roles || [];
+    if (roles.includes('ADMIN')) return 'admin';
+    if (roles.includes('HOST')) return 'host';
+    return 'customer';
+  } catch { return 'customer'; }
+}
+
+async function doLogin() {
+  load(true, '로그인 중...');
+  const r = await api('POST', '/api/v1/auth/login', {
+    email: document.getElementById('liEmail').value,
+    password: document.getElementById('liPw').value,
+  });
+  load(false);
+  if (r.ok && r.data?.data?.accessToken) {
+    const tok = r.data.data.accessToken;
+    const role = roleFromJwt(tok);
+    S.tok.access = tok;
+    if (role === 'host') S.tok.host = tok;
+    else if (role === 'admin') S.tok.admin = tok;
+    sessStart(role, tok);
+  } else toast('로그인 실패: ' + (r.data?.message || '계정 정보를 확인하세요'), 'err');
+}
+
+async function ql(role) {
+  const creds = {
+    customer: ['customer@first-ticket.com', 'Customer1234!'],
+    host:     ['host@first-ticket.com',     'Host1234!'],
+    admin:    ['admin@first-ticket.com',    'Admin1234!'],
+  };
+  load(true, '로그인 중...');
+  const r = await api('POST', '/api/v1/auth/login', { email: creds[role][0], password: creds[role][1] });
+  load(false);
+  if (r.ok && r.data?.data?.accessToken) {
+    const tok      = r.data.data.accessToken;
+    const detected = roleFromJwt(tok);
+    // 어떤 역할이든 access 토큰에도 저장 (API 자동 주입용)
+    S.tok.access = tok;
+    if (detected === 'host')        S.tok.host  = tok;
+    else if (detected === 'admin')  S.tok.admin = tok;
+    sessStart(detected, tok);
+  } else toast('로그인 실패: ' + (r.data?.message || ''), 'err');
+}
+
+function sessStart(role, tok) {
+  S.role = role;
+  // 역할 전용 토큰 저장
+  if (role === 'host')       S.tok.host  = tok;
+  else if (role === 'admin') S.tok.admin = tok;
+  // api() 자동 주입에서 공통으로 사용 — 항상 access에도 저장
+  S.tok.access = tok;
+
+  const lbl = { customer:'CUSTOMER', host:'HOST', admin:'ADMIN' };
+  const ini = { customer:'고', host:'호', admin:'관' };
+  const cls = { customer:'role-c', host:'role-h', admin:'role-a' };
+  const bg  = { customer:'#2dcfb3', host:'#3b5bdb', admin:'#c84b00' };
+  ['','2'].forEach(s => {
+    const re = document.getElementById('nRole' + s); if (re) { re.textContent = lbl[role]; re.className = 'nav-role ' + cls[role]; }
+    const av = document.getElementById('nAv' + s); if (av) { av.textContent = ini[role]; av.style.background = bg[role]; }
+  });
+
+  toast(`${lbl[role]}으로 로그인되었습니다`, 'ok');
+  if (role === 'host') go('host');
+  else if (role === 'admin') go('admin');
+  else go('home');
+}
+
+function doLogout() {
+  api('POST', '/api/v1/auth/logout', null, authH(S.tok.access || S.tok.host || S.tok.admin));
+  S.tok = { access:null, host:null, admin:null, entry:null, session:null, temp:null };
+  go('login');
+  toast('로그아웃되었습니다');
+}
+
+function switchTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('loginForm').style.display  = isLogin ? 'block' : 'none';
+  document.getElementById('signupForm').style.display = isLogin ? 'none'  : 'block';
+  const tl = document.getElementById('tabLogin');
+  const ts = document.getElementById('tabSignup');
+  tl.style.fontWeight = isLogin ? '700' : '600';
+  tl.style.borderBottom = isLogin ? '2px solid var(--teal)' : '2px solid transparent';
+  tl.style.color = isLogin ? 'var(--teal)' : 'var(--ink3)';
+  ts.style.fontWeight = isLogin ? '600' : '700';
+  ts.style.borderBottom = isLogin ? '2px solid transparent' : '2px solid var(--teal)';
+  ts.style.color = isLogin ? 'var(--ink3)' : 'var(--teal)';
+  ['loginErr','signupErr','signupOk'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.style.display = 'none';
+  });
+}
+
+async function doSignup() {
+  const name  = document.getElementById('suName').value.trim();
+  const email = document.getElementById('suEmail').value.trim();
+  const pw    = document.getElementById('suPw').value;
+  const pwc   = document.getElementById('suPwC').value;
+  const errEl = document.getElementById('signupErr');
+  const okEl  = document.getElementById('signupOk');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+
+  if (!name)                        { errEl.textContent = '이름을 입력하세요'; errEl.style.display='block'; return; }
+  if (!email || !email.includes('@')){ errEl.textContent = '올바른 이메일을 입력하세요'; errEl.style.display='block'; return; }
+  if (pw.length < 8)                { errEl.textContent = '비밀번호는 8자 이상이어야 합니다'; errEl.style.display='block'; return; }
+  if (pw !== pwc)                   { errEl.textContent = '비밀번호가 일치하지 않습니다'; errEl.style.display='block'; return; }
+
+  load(true, '회원가입 중...');
+  const r = await api('POST', '/api/v1/auth/signup', { email, password: pw, username: name });
+  load(false);
+
+  if (r.ok) {
+    okEl.textContent = '가입 완료! 잠시 후 로그인 화면으로 이동합니다 🎉';
+    okEl.style.display = 'block';
+    document.getElementById('liEmail').value = email;
+    document.getElementById('liPw').value = pw;
+    setTimeout(() => switchTab('login'), 1800);
+    toast('회원가입 완료! 로그인해보세요', 'ok');
+  } else {
+    errEl.textContent = r.data?.message || '회원가입에 실패했습니다. 다시 시도해주세요.';
+    errEl.style.display = 'block';
+  }
+}
+
+
+// ── Events ────────────────────────────────────────────────────
+let curCat = 'ALL';
+let cachedPrograms = [];  // API 응답 캐시
+
+function fcat(el, cat) {
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('on'));
+  el.classList.add('on'); curCat = cat; renderEvts(cat);
+}
+
+// API 프로그램 → 카드용 객체 변환
+function mapProgram(p) {
+  const catEmoji = { CONCERT:'🎵', MUSICAL:'🎭', SPORTS:'⚾', EXHIBITION:'🖼', DEFAULT:'🎟' };
+  return {
+    id:      p.id,
+    title:   p.title,
+    cat:     p.category,
+    theme:   p.theme || '',
+    region:  p.region || '',
+    emoji:   catEmoji[p.category] || catEmoji.DEFAULT,
+    venue:   p.venueName || p.venue || '',
+    desc:    p.description || '',
+    price:   p.minPrice || 0,
+    saleStartAt: p.saleStartAt || null,
+    scheds:  (p.schedules || []).map(s => ({
+      id:        s.id,
+      date:      s.eventStartAt ? s.eventStartAt.slice(0,10) : '—',
+      time:      s.eventStartAt ? s.eventStartAt.slice(11,16) : '—',
+      remain:    s.remainingCount ?? s.remainingSeats ?? s.availableSeats ?? 0,
+      total:     s.totalCapacity || s.totalSeats || 0,
+      price:     s.minPrice || p.minPrice || s.priceGrades?.[0]?.price || 0,
+      saleStart: s.saleStartAt ? s.saleStartAt.slice(0,10) : '—',
+      saleEnd:   s.saleEndAt ? s.saleEndAt.slice(0,10) : '—',
+    })),
+  };
+}
+
+async function loadPrograms() {
+  const r = await api('GET', '/api/v1/programs?page=0&size=20&status=ON_SALE');
+  if (r.ok && r.data?.data) {
+    const list = r.data.data.content || r.data.data || [];
+    cachedPrograms = list.filter(p => p.status === 'ON_SALE').map(mapProgram);
+  } else {
+    cachedPrograms = [];
+  }
+}
+
+function renderEvts(cat) {
+  const g = document.getElementById('evGrid'); if (!g) return;
+  const evts = (cat === 'ALL' ? cachedPrograms : cachedPrograms.filter(e => e.cat === cat));
+  if (!evts.length) {
+    g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--ink3)">공연 정보를 불러오는 중...</div>';
+    return;
+  }
+  const minPrice = e => e.price || (e.scheds?.length ? Math.min(...e.scheds.map(s=>s.price||0)) : 0);
+  g.innerHTML = evts.map(e => `
+    <div class="ev-card" onclick="openDetail('${e.id}')">
+      <div class="ev-thumb">
+        <div class="ev-emoji">${e.emoji}</div>
+      </div>
+      <div class="ev-body">
+        <div class="ev-cat">${e.cat}</div>
+        <div class="ev-title">${e.title}</div>
+        <div class="ev-info">📅 판매 시작: ${e.saleStartAt ? e.saleStartAt.slice(0,10) : '—'}</div>
+        <div class="ev-price">${minPrice(e).toLocaleString()}원~</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── Detail ────────────────────────────────────────────────────
+async function openDetail(id) {
+  go('detail');
+  // 로딩 표시
+  document.getElementById('dTitle').textContent = '불러오는 중...';
+  document.getElementById('schedList').innerHTML = '<div style="color:var(--ink3);font-size:13px;padding:8px">스케줄 조회 중...</div>';
+
+  // 캐시에서 기본 정보 먼저 표시
+  let e = cachedPrograms.find(x => x.id === id) || null;
+
+  // 상세 API 호출
+  const r = await api('GET', `/api/v1/programs/${id}`);
+  if (r.ok && r.data?.data) {
+    e = mapProgram(r.data.data);
+  }
+
+  if (!e) { toast('공연 정보를 불러올 수 없습니다', 'err'); go('home'); return; }
+
+  S.ev = e;
+  S.sched = e.scheds?.[0] || null;
+
+  document.getElementById('dPoster').textContent = e.emoji;
+  document.getElementById('dCat').textContent = `${e.cat} · ${e.theme}`;
+  document.getElementById('dTitle').textContent = e.title;
+  document.getElementById('dMeta').innerHTML = `<div>🗓 ${e.scheds?.[0]?.date || '—'} ~ ${e.scheds?.[e.scheds.length-1]?.date || '—'}</div><div>💺 지정석 · 전체 관람가</div>`;
+  document.getElementById('dDesc').textContent = e.desc;
+  document.getElementById('dInfoTbl').innerHTML = `<div style="color:var(--ink3)">장르</div><div>${e.cat}</div><div style="color:var(--ink3)">테마</div><div>${e.theme||'—'}</div><div style="color:var(--ink3)">지역</div><div>${e.region||'—'}</div><div style="color:var(--ink3)">관람등급</div><div>전체 관람가</div>`;
+
+  const sl = document.getElementById('schedList');
+  if (!e.scheds?.length) {
+    sl.innerHTML = '<div style="color:var(--ink3);font-size:13px">등록된 스케줄이 없습니다</div>';
+    document.getElementById('resBtn').disabled = true;
+    return;
+  }
+  sl.innerHTML = e.scheds.map((s, i) => `
+    <div class="sched-item ${i===0?'on':''}" onclick="selSched(this,'${s.id}',${i})">
+      <div class="sched-d">${s.date} (${s.time})</div>
+      <div class="sched-r">판매 ${s.saleStart} ~ ${s.saleEnd} · ${s.remain===0?'<span style="color:var(--red)">매진</span>':s.remain<20?`<span style="color:var(--gold)">${s.remain}석 남음</span>`:`${s.remain}석 남음`}</div>
+    </div>`).join('');
+  document.getElementById('priceInfo').textContent = `일반석 ${(e.scheds[0].price||0).toLocaleString()}원 · 잔여 ${e.scheds[0].remain}석`;
+  document.getElementById('resBtn').disabled = e.scheds.every(s => s.remain === 0);
+}
+
+function selSched(el, id, i) {
+  document.querySelectorAll('.sched-item').forEach(x => x.classList.remove('on'));
+  el.classList.add('on'); S.sched = S.ev.scheds[i];
+  document.getElementById('priceInfo').textContent = `일반석 ${S.sched.price.toLocaleString()}원 · 잔여 ${S.sched.remain}석`;
+  document.getElementById('resBtn').disabled = S.sched.remain === 0;
+}
+
+// ── Queue ─────────────────────────────────────────────────────
+async function startReserve() {
+  if (!S.sched) { toast('회차를 선택하세요', 'err'); return; }
+  load(true, '대기열 진입 중...');
+  const r = await api('POST', `/api/v1/queues/programs/${S.ev.id}`, null, authH(S.tok.access));
+  load(false);
+  if (r.ok) {
+    go('queue');
+    document.getElementById('qNum').textContent = r.data?.data?.position || '?';
+    let cnt = 0;
+    S.qTmr = setInterval(async () => {
+      cnt++;
+      const x = await api('GET', `/api/v1/queues/programs/${S.ev.id}`, null, authH(S.tok.access));
+      if (!x.ok) return;
+      const d = x.data?.data;
+      if (d?.status === 'ADMITTED') {
+        clearInterval(S.qTmr);
+        S.tok.entry = d.entryToken || '';
+        proceedSeats();
+      } else {
+        const p = d?.position || Math.max(1, 10 - cnt * 2);
+        document.getElementById('qNum').textContent = p;
+        document.getElementById('qBar').style.width = Math.min(92, cnt * 18) + '%';
+        document.getElementById('qMsg').textContent = `${(cnt * 0.5).toFixed(1)}초 경과 · 잠시 기다려 주세요...`;
+      }
+    }, 500);
+  } else toast('대기열 진입 실패: ' + (r.data?.message || ''), 'err');
+}
+
+async function proceedSeats() {
+  load(true, '예매 세션 발급 중...');
+  const r = await api('POST', `/api/v1/bookings/${S.ev.id}/session`, {}, entryH());
+  load(false);
+  if (r.ok) {
+    S.tok.session = r.data?.data?.sessionToken || '';
+    await loadSeats();
+  } else toast('세션 발급 실패: ' + (r.data?.message || ''), 'err');
+}
+
+// ── Seats ─────────────────────────────────────────────────────
+async function loadSeats() {
+  load(true, '좌석 정보 불러오는 중...');
+  const r = await api('GET', `/api/v1/seats/schedules/${S.sched.id}`, null, authH(S.tok.access));
+  load(false);
+  if (!r.ok) { toast('좌석 조회 실패', 'err'); return; }
+  S.selectedSeats = [];
+  const secs = r.data?.data?.sections || [];
+  renderSeatSecs(secs);
+  document.getElementById('sNavEv').textContent = S.ev.title;
+  document.getElementById('sNavDt').textContent = S.sched.date + ' ' + S.sched.time;
+  document.getElementById('ssEvN').textContent = S.ev.title;
+  document.getElementById('ssEvD').textContent = `${S.sched.date} ${S.sched.time} · ${S.ev.venue}`;
+  updateSeatSb();
+  go('seats');
+}
+
+function renderSeatSecs(secs) {
+  const wrap = document.getElementById('seatSecs'); wrap.innerHTML = '';
+  secs.forEach(sec => {
+    const rows = {};
+    (sec.seats || []).forEach(s => { if (!rows[s.rowNum]) rows[s.rowNum] = []; rows[s.rowNum].push(s); });
+    const div = document.createElement('div'); div.className = 'seat-sec';
+    div.innerHTML = `<div class="seat-sec-name">${sec.name || '구역'} <span style="font-weight:400;color:var(--ink3)">잔여 ${sec.availableCount || 0}석</span></div><div class="seat-grid-o" id="g-${sec.name?.replace(/\s/g,'')}"></div>`;
+    wrap.appendChild(div);
+    const grid = div.querySelector('.seat-grid-o');
+    Object.keys(rows).sort((a, b) => +a - +b).forEach(row => {
+      const rd = document.createElement('div'); rd.className = 'seat-row';
+      rd.innerHTML = `<div class="row-lbl">${row}</div>`;
+      rows[row].sort((a, b) => a.colNum - b.colNum).forEach(seat => {
+        const b = document.createElement('button');
+        b.className = 'seat' + (seat.status === 'RESERVED' || seat.status === 'HELD' ? ' rs' : '');
+        b.textContent = seat.colNum;
+        b.title = `R${seat.rowNum}C${seat.colNum} · ${(seat.price||0).toLocaleString()}원`;
+        if (seat.status === 'AVAILABLE') b.onclick = () => toggleSeat(b, seat);
+        rd.appendChild(b);
+      });
+      grid.appendChild(rd);
+    });
+  });
+}
+
+function toggleSeat(btn, seat) {
+  const idx = S.selectedSeats.findIndex(s => s.seatId === seat.seatId);
+  if (idx >= 0) { S.selectedSeats.splice(idx, 1); btn.classList.remove('sel'); }
+  else { S.selectedSeats.push(seat); btn.classList.add('sel'); }
+  updateSeatSb();
+}
+
+function updateSeatSb() {
+  const list = document.getElementById('selList');
+  const tot = S.selectedSeats.reduce((a, s) => a + (s.price || 0), 0);
+  document.getElementById('ssTotal').textContent = tot.toLocaleString() + '원';
+  document.getElementById('holdBtn').disabled = S.selectedSeats.length === 0;
+  list.innerHTML = S.selectedSeats.length
+    ? S.selectedSeats.map(s => `<div class="sel-item"><div class="sel-seat-info">R${s.rowNum}C${s.colNum}</div><div class="sel-seat-price">${(s.price||0).toLocaleString()}원</div></div>`).join('')
+    : '<div style="color:var(--ink3);font-size:13px;padding:8px 0">좌석을 클릭하여 선택하세요</div>';
+}
+
+async function doHold() {
+  if (!S.selectedSeats.length) return;
+  load(true, '좌석 선점 중...');
+  const r = await api('POST', `/api/v1/seats/schedules/${S.sched.id}/hold`,
+    { seatIds: S.selectedSeats.map(s => s.seatId) }, sessionH());
+  load(false);
+  if (r.ok) {
+    startHoldTmr();
+    goConfirm();
+  } else toast('선점 실패: ' + (r.data?.message || ''), 'err');
+}
+
+function startHoldTmr() {
+  S.holdEnd = Date.now() + 10 * 60 * 1000;
+  function tick() {
+    const rem = Math.max(0, S.holdEnd - Date.now());
+    const m = String(Math.floor(rem / 60000)).padStart(2, '0');
+    const s = String(Math.floor((rem % 60000) / 1000)).padStart(2, '0');
+    ['navTmr', 'cfTmr'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = `${m}:${s}`; });
+    if (rem <= 0) { clearInterval(S.holdTmr); toast('선점 시간이 만료되었습니다', 'err'); go('home'); }
+  }
+  tick(); S.holdTmr = setInterval(tick, 1000);
+}
+
+function goConfirm() {
+  const tot = S.selectedSeats.reduce((a, s) => a + (s.price || 0), 0);
+  document.getElementById('cfEv').textContent = S.ev.title;
+  document.getElementById('cfDt').textContent = `${S.sched.date} ${S.sched.time}`;
+  document.getElementById('cfVn').textContent = S.ev.venue;
+  document.getElementById('cfSt').textContent = S.selectedSeats.map(s => `R${s.rowNum}C${s.colNum}`).join(', ');
+  document.getElementById('cfTot').textContent = tot.toLocaleString() + '원';
+  go('confirm');
+}
+
+// ── Booking ───────────────────────────────────────────────────
+async function doBooking() {
+  load(true, '예매 생성 중...');
+  const r = await api('POST', '/api/v1/bookings', {
+    programId: S.ev.id,
+    scheduleId: S.sched.id,
+    seatList: S.selectedSeats.map(s => s.seatId),
+  }, sessionH());
+  if (!r.ok) { load(false); toast('예매 생성 실패: ' + (r.data?.message || ''), 'err'); return; }
+  S.ids.booking  = r.data?.data?.bookingId;
+  S.ids.orderId  = r.data?.data?.orderId;
+  S.ids.payId    = r.data?.data?.paymentId;
+
+  // 결제 페이지 → 실제 API면 새 탭으로 열기
+  const tot = S.selectedSeats.reduce((a, s) => a + (s.price || 0), 0);
+  const payUrl = `${CFG.base}/api/v1/payments/payment-page?orderId=${S.ids.orderId}&amount=${tot}`;
+  load(false);
+
+  // 결제 팝업 안내
+  const ok = confirm(`결제창을 열겠습니다.\n\n결제 URL:\n${payUrl}\n\n결제를 완료하면 확인 버튼을 눌러주세요.`);
+  if (ok) window.open(payUrl, '_blank');
+
+  // 결제 완료 대기 → 예매 상태 폴링
+  load(true, '결제 완료를 기다리는 중...');
+  let confirmed = false;
+  for (let i = 0; i < 30; i++) {
+    await new Promise(res => setTimeout(res, 2000));
+    const px = await api('GET', `/api/v1/payments/${S.ids.payId}`, null, authH(S.tok.access));
+    if (px.ok && px.data?.data?.status === 'SUCCESS') { confirmed = true; break; }
+    const bx = await api('GET', `/api/v1/bookings/my/${S.ids.booking}`, null, authH(S.tok.access));
+    if (bx.ok && bx.data?.data?.status === 'CONFIRMED') { confirmed = true; break; }
+  }
+  load(false);
+
+  const tot2 = S.selectedSeats.reduce((a, s) => a + (s.price || 0), 0);
+  document.getElementById('tkEv').textContent = S.ev.title;
+  document.getElementById('tkDt').textContent = `${S.sched.date} ${S.sched.time} · ${S.ev.venue}`;
+  document.getElementById('tkSt').textContent = S.selectedSeats.map(s => `R${s.rowNum}C${s.colNum}`).join(', ');
+  document.getElementById('tkPr').textContent = tot2.toLocaleString() + '원';
+  document.getElementById('tkId').textContent = S.ids.booking || 'BK-' + Date.now();
+
+  S.myBookings.unshift({ id: S.ids.booking, ev: S.ev, sched: S.sched, seats: [...S.selectedSeats], tot: tot2, status: confirmed ? 'CONFIRMED' : 'PENDING' });
+  clearInterval(S.holdTmr);
+  toast(confirmed ? '예매가 완료되었습니다 🎉' : '결제를 처리 중입니다', confirmed ? 'ok' : '');
+  go('success');
+}
+
+async function doRefund() {
+  if (!confirm('예매를 취소하고 환불을 요청하시겠습니까?')) return;
+  load(true, '환불 처리 중...');
+  const r = await api('POST', `/api/v1/payments/${S.ids.payId}/refund`, { cancelReason: '단순 변심' }, authH(S.tok.access));
+  load(false);
+  if (r.ok) { toast('환불이 접수되었습니다', 'ok'); S.myBookings = S.myBookings.map(b => b.id === S.ids.booking ? {...b, status:'CANCELLED'} : b); go('my'); }
+  else toast('환불 요청 실패: ' + (r.data?.message || ''), 'err');
+}
+
+// ── My Bookings ───────────────────────────────────────────────
+async function renderMy() {
+  const list = document.getElementById('myList');
+  const r = await api('GET', '/api/v1/bookings/my?page=0&size=20', null, authH(S.tok.access));
+  if (r.ok && r.data?.data?.content?.length) {
+    list.innerHTML = r.data.data.content.map(b => `
+      <div class="my-item" onclick="showBooking('${b.bookingId}')">
+        <div class="my-thumb">🎟️</div>
+        <div class="my-info">
+          <div class="my-title">${b.programTitle || '공연'}</div>
+          <div class="my-meta">${b.totalCount || 1}매</div>
+        </div>
+        <div class="my-right">
+          <div class="my-price">${(b.totalPrice || 0).toLocaleString()}원</div>
+          <span class="bdg ${b.status==='CONFIRMED'?'bdg-green':b.status==='CANCELED'||b.status==='CANCELLED'?'bdg-gray':'bdg-teal'}">${b.status}</span>
+        </div>
+      </div>`).join('');
+  } else {
+    if (!S.myBookings.length) {
+      list.innerHTML = '<div style="text-align:center;padding:60px;color:var(--ink3)"><div style="font-size:44px;margin-bottom:12px">🎫</div><div style="font-size:16px;font-weight:600;color:var(--ink2)">아직 예매 내역이 없습니다</div><div style="font-size:13px;margin-top:6px;margin-bottom:20px">공연을 찾아 예매해보세요</div><button class="btn btn-teal" onclick="go(\'home\')">공연 둘러보기</button></div>';
+      return;
+    }
+    list.innerHTML = S.myBookings.map(b => `
+      <div class="my-item" onclick="showBooking('${b.id}')">
+        <div class="my-thumb">${b.ev.emoji}</div>
+        <div class="my-info">
+          <div class="my-title">${b.ev.title}</div>
+          <div class="my-meta">📅 ${b.sched.date} ${b.sched.time}<br>📍 ${b.ev.venue}<br>💺 ${b.seats.map(s=>`R${s.rowNum}C${s.colNum}`).join(', ')}</div>
+        </div>
+        <div class="my-right">
+          <div class="my-price">${b.tot.toLocaleString()}원</div>
+          <span class="bdg ${b.status==='CONFIRMED'?'bdg-green':b.status==='CANCELLED'?'bdg-gray':'bdg-teal'}">${b.status}</span>
+        </div>
+      </div>`).join('');
+  }
+}
+
+async function showBooking(bookingId) {
+  const modal = document.getElementById('bookingModal');
+  const content = document.getElementById('bookingModalContent');
+  content.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink3)">조회 중...</div>';
+  modal.style.display = 'flex';
+  const r = await api('GET', `/api/v1/bookings/my/${bookingId}`);
+  if (r.ok && r.data?.data) {
+    const d = r.data.data;
+    const seats = (d.bookingItemInfos || []).map(s => `${s.seatPosition} · ${(s.price||0).toLocaleString()}원`).join('<br>');
+    content.innerHTML = `
+      <div style="background:var(--bg);border-radius:var(--r);padding:16px;font-size:13px;line-height:2;color:var(--ink2)">
+        <div><b style="color:var(--ink)">공연:</b> ${d.programTitle || '—'}</div>
+        <div><b style="color:var(--ink)">일정:</b> ${d.eventStartAt ? d.eventStartAt.replace('T',' ').slice(0,16) : '—'} ~ ${d.eventEndAt ? d.eventEndAt.slice(11,16) : '—'}</div>
+        <div><b style="color:var(--ink)">장소:</b> ${d.venueName || '—'}</div>
+        <div><b style="color:var(--ink)">주소:</b> ${d.venueAddress || '—'}</div>
+        <div><b style="color:var(--ink)">좌석:</b><br>${seats || '—'}</div>
+        <div><b style="color:var(--ink)">매수:</b> ${d.totalCount || '—'}매</div>
+        <div><b style="color:var(--ink)">금액:</b> ${(d.totalPrice || 0).toLocaleString()}원</div>
+        <div><b style="color:var(--ink)">상태:</b> <span class="bdg ${d.status==='CONFIRMED'?'bdg-green':d.status==='CANCELLED'||d.status==='CANCELED'?'bdg-gray':'bdg-teal'}">${d.status || '—'}</span></div>
+      </div>
+      ${d.status === 'CONFIRMED' ? `<button class="btn btn-red btn-w" style="margin-top:14px" onclick="cancelBooking('${bookingId}')">예매 취소</button>` : ''}`;
+  } else {
+    content.innerHTML = `<div style="color:var(--red);font-size:13px">조회 실패: ${r.data?.message || '서버 오류'}</div>`;
+  }
+}
+
+async function cancelBooking(bookingId) {
+  if (!confirm('예매를 취소하시겠습니까?')) return;
+  load(true, '예매 취소 중...');
+  const r = await api('POST', `/api/v1/bookings/${bookingId}/cancel`);
+  load(false);
+  if (r.ok) {
+    toast('예매가 취소되었습니다', 'ok');
+    document.getElementById('bookingModal').style.display = 'none';
+    renderMy();
+  } else toast('취소 실패: ' + (r.data?.message || ''), 'err');
+}
+
+// ── HOST ──────────────────────────────────────────────────────
+function hMenu(el, panel) {
+  document.querySelectorAll('.hm').forEach(m => m.classList.remove('on')); el.classList.add('on');
+  document.querySelectorAll('.h-panel').forEach(p => p.classList.remove('on'));
+  document.getElementById('h-' + panel).classList.add('on');
+  if (panel === 'dash') hDash();
+  if (panel === 'sched' || panel === 'pub') {
+    const now = new Date(Date.now() + 60000);
+    const pad = n => String(n).padStart(2, '0');
+    const str = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const ss = document.getElementById('hSs'); if (ss && !ss.value) ss.value = str;
+    const pi = document.getElementById('hPid'); if (pi && S.ids.prog) pi.value = S.ids.prog;
+  }
+}
+
+async function hDash() {
+  document.getElementById('hSv').textContent = S.ids.venue ? '1' : '0';
+  document.getElementById('hSp').textContent = '—';
+  document.getElementById('hSo').textContent = '—';
+  document.getElementById('hSr').textContent = '—';
+
+  const r = await api('GET', '/api/v1/programs?page=0&size=20', null, authH(S.tok.host));
+  if (r.ok && r.data?.data?.content?.length) {
+    const list = r.data.data.content;
+    const onSale = list.filter(p => p.status === 'ON_SALE').length;
+    document.getElementById('hSp').textContent = list.length;
+    document.getElementById('hSo').textContent = onSale;
+    document.getElementById('hSr').textContent = '—';
+    document.getElementById('hTbl').innerHTML = list.map(p => `
+      <tr>
+        <td style="font-weight:600;color:var(--ink)">${p.title}</td>
+        <td>${p.category}</td>
+        <td><span class="bdg ${p.status==='ON_SALE'?'bdg-green':p.status==='DRAFT'?'bdg-gold':'bdg-gray'}">${p.status}</span></td>
+        <td>${p.saleStartAt ? p.saleStartAt.slice(0,10) : '미등록'}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="hSelectProg('${p.id}')">선택</button></td>
+      </tr>`).join('');
+  } else {
+    document.getElementById('hSp').textContent = '0';
+    document.getElementById('hSo').textContent = '0';
+    document.getElementById('hTbl').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--ink3);padding:28px">등록된 프로그램이 없습니다</td></tr>';
+  }
+}
+
+function hSelectProg(id) {
+  S.ids.prog = id;
+  document.getElementById('hPid').value = id;
+  toast('프로그램이 선택되었습니다', 'ok');
+}
+
+async function hVenue() {
+  load(true, '공연장 등록 중...');
+  const r = await api('POST', '/api/v1/venues', {
+    name: document.getElementById('hVn').value,
+    address: document.getElementById('hVa').value,
+    sections: [{ name: document.getElementById('hSn').value, type: 'SEATED', rowCount: +document.getElementById('hR').value, colCount: +document.getElementById('hC').value }],
+  }, authH(S.tok.host));
+  load(false);
+  if (r.ok) {
+    S.ids.venue = r.data?.data?.id; S.ids.section = r.data?.data?.sections?.[0]?.id;
+    document.getElementById('hVr').textContent = `✅ 공연장 등록 완료 (ID: ${S.ids.venue})`;
+    toast('공연장 등록 완료', 'ok');
+  } else toast('등록 실패: ' + (r.data?.message || ''), 'err');
+}
+
+async function hProg() {
+  load(true, '프로그램 등록 중...');
+  const r = await api('POST', '/api/v1/programs', {
+    title: document.getElementById('hPt').value,
+    category: document.getElementById('hPc').value,
+    theme: document.getElementById('hPh').value,
+    type: 'SEATED',
+    region: document.getElementById('hPr').value,
+    posterUrl: 'https://example.com/poster.jpg',
+    description: document.getElementById('hPd').value,
+  }, authH(S.tok.host));
+  load(false);
+  if (r.ok) {
+    S.ids.prog = r.data?.data?.id;
+    document.getElementById('hPres').textContent = `✅ 프로그램 등록 완료 (ID: ${S.ids.prog})`;
+    toast('프로그램 등록 완료', 'ok');
+  } else toast('등록 실패: ' + (r.data?.message || ''), 'err');
+}
+
+async function hSched() {
+  if (!S.ids.prog) { toast('프로그램을 먼저 등록하세요', 'err'); return; }
+  load(true, '스케줄 등록 중...');
+  const r = await api('POST', `/api/v1/programs/${S.ids.prog}/schedules`, {
+    venueId: S.ids.venue,
+    eventStartAt: document.getElementById('hEs').value + ':00',
+    eventEndAt:   document.getElementById('hEe').value + ':00',
+    saleStartAt:  document.getElementById('hSs').value + ':00',
+    saleEndAt:    document.getElementById('hSe').value + ':00',
+  }, authH(S.tok.host));
+  load(false);
+  if (r.ok) {
+    S.ids.sched = r.data?.data?.schedules?.[0]?.id;
+    document.getElementById('hScr').textContent = `✅ 스케줄 등록 완료 (ID: ${S.ids.sched})`;
+    toast('스케줄 등록 완료', 'ok');
+  } else toast('등록 실패: ' + (r.data?.message || ''), 'err');
+}
+
+async function hGrade() {
+  if (!S.ids.sched) { toast('스케줄을 먼저 등록하세요', 'err'); return; }
+  load(true, '가격 등급 추가 중...');
+  const r = await api('POST', `/api/v1/programs/${S.ids.prog}/schedules/${S.ids.sched}/price-grades`, {
+    gradeLabel: document.getElementById('hGl').value,
+    sectionId: S.ids.section,
+    price: +document.getElementById('hGp').value,
+  }, authH(S.tok.host));
+  load(false);
+  if (r.ok) { document.getElementById('hGr').textContent = '✅ 가격 등급 추가 완료'; toast('가격 등급 추가 완료', 'ok'); }
+  else toast('추가 실패: ' + (r.data?.message || ''), 'err');
+}
+
+async function hPublish() {
+  const pid = document.getElementById('hPid').value || S.ids.prog;
+  if (!pid) { toast('프로그램 ID를 입력하세요', 'err'); return; }
+  load(true, '판매 시작 처리 중...');
+  const r = await api('PATCH', `/api/v1/programs/${pid}/publish`, null, authH(S.tok.host));
+  load(false);
+  const el = document.getElementById('hPubr');
+  if (r.ok) { el.style.color = 'var(--green)'; el.textContent = '✅ 판매가 시작되었습니다! 상태: ON_SALE'; toast('판매 시작 완료 🚀', 'ok'); }
+  else { el.style.color = 'var(--red)'; el.textContent = '❌ 실패: ' + (r.data?.message || '모든 스케줄에 가격 등급 필요'); toast('판매 시작 실패', 'err'); }
+}
+
+// ── ADMIN ─────────────────────────────────────────────────────
+function aMenu(el, panel) {
+  document.querySelectorAll('.am').forEach(m => m.classList.remove('on')); el.classList.add('on');
+  document.querySelectorAll('.a-panel').forEach(p => p.classList.remove('on'));
+  document.getElementById('a-' + panel).classList.add('on');
+  if (panel === 'host-req') loadHostRequests();
+}
+
+function aRefreshDash() {
+  document.getElementById('aSu').textContent = '—';
+  document.getElementById('aSh').textContent = '—';
+  document.getElementById('aSp').textContent = '—';
+  document.getElementById('aSr').textContent = S.ids.reqId ? '1' : '0';
+}
+
+// ① 신규 가입
+async function loadHostRequests() {
+  load(true, 'HOST 신청 목록 조회 중...');
+  const r = await api('GET', '/api/v1/admin/host-requests?status=PENDING&page=0&size=20', null, authH(S.tok.admin));
+  load(false);
+  const el = document.getElementById('pendingReqs');
+  if (r.ok && r.data?.data) {
+    const list = r.data.data.content || r.data.data || [];
+    if (!list.length) {
+      el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--ink3)">대기 중인 신청이 없습니다</div>';
+      return;
+    }
+    el.innerHTML = list.map(req => `
+      <div class="req-item">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:16px">👤</div>
+        <div class="req-info">
+          <div class="req-name">${req.username || req.email || '—'}</div>
+          <div>요청 ID: ${req.id} · 상태: ${req.status}</div>
+        </div>
+        <div class="req-acts">
+          <button class="btn btn-teal btn-sm" onclick="aApprove('${req.id}','APPROVE')">승인</button>
+          <button class="btn btn-red btn-sm" onclick="aApprove('${req.id}','REJECT')">거절</button>
+        </div>
+      </div>`).join('');
+  } else {
+    el.innerHTML = `<div style="color:var(--red);font-size:13px">조회 실패: ${r.data?.message || '서버 오류'}</div>`;
+  }
+}
+
+async function aApprove(reqId, action) {
+  load(true, action === 'APPROVE' ? '승인 처리 중...' : '거절 처리 중...');
+  const r = await api('PATCH', `/api/v1/admin/host-requests/${reqId}`, { action }, authH(S.tok.admin));
+  load(false);
+  if (r.ok) {
+    toast(action === 'APPROVE' ? 'HOST 신청을 승인했습니다' : 'HOST 신청을 거절했습니다', 'ok');
+    loadHostRequests();
+  } else toast('처리 실패: ' + (r.data?.message || ''), 'err');
+}
+
+async function loadMyInfo() {
+  load(true, '내 정보 조회 중...');
+  const tok = S.tok.admin || S.tok.host || S.tok.access;
+  const r = await api('GET', '/api/v1/users/me', null, authH(tok));
+  load(false);
+  const el = document.getElementById('myInfoResult');
+  if (r.ok && r.data?.data) {
+    const d = r.data.data;
+    el.innerHTML = `<div style="background:var(--bg);border-radius:var(--r);padding:14px;font-size:13px;line-height:1.9;color:var(--ink2)"><div><b style="color:var(--ink)">이름:</b> ${d.username || '—'}</div><div><b style="color:var(--ink)">이메일:</b> ${d.email || '—'}</div><div><b style="color:var(--ink)">역할:</b> <span class="bdg bdg-teal">${d.role || '—'}</span></div></div>`;
+  } else el.innerHTML = `<div style="color:var(--red);font-size:13px;margin-top:8px">조회 실패: ${r.data?.message || '서버 오류'}</div>`;
+}
+
+// ── Init ──────────────────────────────────────────────────────
+const now = new Date(Date.now() + 60000);
+const pad = n => String(n).padStart(2, '0');
+const si = document.getElementById('hSs');
+if (si) si.value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+</script>
+</body>
+</html>
